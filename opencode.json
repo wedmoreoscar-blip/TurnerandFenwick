@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "paths": [
+      ".agents/skills",
+      ".claude/skills"
+    ]
+  },
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.local": "deny",
+      "*.env.development": "deny",
+      "*.env.production": "deny",
+      "*.env.test": "deny",
+      "*.env.staging": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "git push": "deny",
+      "git push *": "deny",
+      "git -C * push *": "deny"
+    }
+  }
+}

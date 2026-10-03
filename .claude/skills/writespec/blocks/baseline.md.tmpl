@@ -1,0 +1,15 @@
+
+## What you run, and what you do not
+
+Run exactly these, from the root of your worktree:
+
+{run_list}
+
+{skip_paragraph}Do not install, add or change dependencies; your worktree is already provisioned.
+{forbid_line}Do not run `git commit`, `git push`, `git merge`, `git rebase`, `git reset`, `git stash`, or switch
+branches. Leave your work uncommitted; the orchestrator commits the handback.
+
+If a command is still running when you have everything you need, stop it and report. A result you
+are waiting on is not worth more than the report.
+
+{blocked_paragraph}

@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""PreToolUse guard: no delegation is commissioned without a writespec spec.
+
+Reads a Claude Code PreToolUse hook payload on stdin. A *commission* is any dispatch of work to an
+implementer. Core recognises one kind: a Claude Code subagent launched with worktree isolation
+(`Agent`/`Task` tool, `isolation: "worktree"`), which is how docs/workflows/delegation.md runs a
+native-subagent implementer. Research or exploration subagents without worktree isolation are not
+commissions. Harness packs add more kinds as plugins: any `tools/writespec_guard_*.py` module with an
+`extract(payload) -> str | None` function returning the commission text, or None when the payload
+commissions nothing (for example the `traycer` pack's `traycer agent send`).
+
+A commission is denied unless its text, plus any spec file it reads or names under tasks/specs/,
+contains the three writespec blocks exactly as `tools/spec-block` renders them. It is also denied if
+it instructs the implementer to run a checker-only command ([implementer].skip in
+docs/project_profile.md) or to write its own tests.
+
+Literal markers in the commission text:
+  [no-spec]            this message commissions no work (a ping, an acknowledgement, a stand-down)
+  [visual-check]       a visual-check brief (docs/workflows/visual_check.md); no spec is possible
+  [implementer-tests]  the spec states why this ticket needs implementer-written tests
+Bypassable on purpose: the guard exists to stop a spec being forgotten, not to defeat an adversary.
+"""
+import importlib.util
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+TOOLS = Path(__file__).resolve().parent
+sys.path.insert(0, str(TOOLS))
+import agent_profile  # noqa: E402
+
+TEST_COMMISSION_PATTERNS = [
+    r"\brequires?\s+(?:new\s+|additional\s+|focused\s+)*(?:deterministic\s+)?tests?\b",
+    r"\b(?:must|should|please)\s+(?:also\s+)?(?:write|add|create)\s+"
+    r"(?:new\s+|additional\s+|focused\s+|deterministic\s+)*tests?\b",
+    r"\b(?:write|add|create)\s+(?:new|additional|focused|deterministic)\s+"
+    r"(?:\w+\s+)?tests?\b",
+    r"\b(?:add|write)\s+(?:focused\s+)?(?:unit\s+)?(?:test\s+cases|tests\s+for)\b",
+    r"\bexplicitly\s+requires?\s+.{0,40}tests?\b",
+]
+
+
+def heavy_patterns(commands):
+    """Imperatives aimed at a checker-only command, keyed on shape so a spec may still QUOTE one.
+
+    A list item under "run these/the following" counts, as does "must/should/then run <cmd>" or a
+    line starting with "run <cmd>". Merely stating a known-failing count next to the command does not.
+    """
+    if not commands:
+        return []
+    alt = "(?:" + "|".join(re.escape(c.lower()) for c in commands) + ")"
+    return [
+        r"\brun\s+(?:these|the\s+following|all\s+\w+|them)\b[\s\S]{0,1200}?[-*•]\s*`?" + alt,
+        r"\b(?:must|should|please|then)\s+run\s+`?" + alt,
+        r"\brun\s+`?" + alt + r"`?\s+(?:from|in|and|then|before|after)\b",
+        r"^\s*[-*\d.]*\s*run\s+`?" + alt,
+    ]
+
+
+def allow():
+    sys.exit(0)
+
+
+def deny(reason):
+    json.dump({"hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "deny",
+        "permissionDecisionReason": reason,
+    }}, sys.stdout)
+    sys.exit(0)
+
+
+def norm(s):
+    """Collapse whitespace so quoting and indentation don't cause false denials."""
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def extract_native(payload):
+    """A Claude Code subagent launched into its own worktree is an implementer commission."""
+    if payload.get("tool_name") not in ("Agent", "Task"):
+        return None
+    tool_input = payload.get("tool_input", {})
+    if tool_input.get("isolation") != "worktree":
+        return None
+    return tool_input.get("prompt", "") or " "
+
+
+def plugins():
+    found = [extract_native]
+    for path in sorted(TOOLS.glob("writespec_guard_*.py")):
+        spec = importlib.util.spec_from_file_location(path.stem, path)
+        module = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(module)
+        except Exception:
+            continue
+        if hasattr(module, "extract"):
+            found.append(module.extract)
+    return found
+
+
+def referenced_files(text, cwd):
+    """Spec files the commission reads (`cat x`, `$(< x)`) or names (tasks/specs/...)."""
+    paths = [m[1] for m in re.findall(
+        r"(?:\$\(\s*cat\s+|\$\(\s*<\s*|\bcat\s+)([\"']?)([^\s\"';)]+)\1", text)]
+    paths += re.findall(r"(?:^|[\s`'\"(])((?:\S*/)?tasks/specs/[^\s`'\")]+\.md)", text)
+    contents = []
+    for candidate in paths:
+        path = Path(candidate)
+        if not path.is_absolute():
+            path = Path(cwd or os.getcwd()) / path
+        try:
+            contents.append(path.read_text())
+        except OSError:
+            pass
+    return contents
+
+
+def main():
+    try:
+        payload = json.load(sys.stdin)
+    except Exception:
+        allow()  # never break the session on a malformed payload
+
+    text = None
+    for extract in plugins():
+        try:
+            text = extract(payload)
+        except Exception:
+            text = None
+        if text:
+            break
+    if not text:
+        allow()
+    if "[no-spec]" in text or "[visual-check]" in text:
+        allow()
+
+    try:
+        blocks = {name: agent_profile.render_block(name) for name in ("scope", "closing", "baseline")}
+        checker_only = agent_profile.checker_only_commands()
+    except (agent_profile.ProfileError, OSError) as exc:
+        deny(f"writespec-guard cannot build the spec blocks: {exc}. Fix docs/project_profile.md "
+             "(see its TOML block) or the writespec skill, then dispatch again.")
+
+    blob = norm("\n".join([text, *referenced_files(text, payload.get("cwd"))]))
+    missing = [name for name, block in blocks.items() if norm(block) not in blob]
+    if missing:
+        deny(
+            "Blocked by writespec-guard: this dispatch commissions a delegation but the spec is "
+            "missing the " + ", ".join(missing) + " block(s).\n\n"
+            "docs/workflows/delegation.md requires every delegation to be commissioned by a "
+            "writespec spec with the fixed blocks APPENDED, not retyped:\n\n"
+            "    tools/spec-block baseline >> <spec-file>\n"
+            "    tools/spec-block scope >> <spec-file>\n"
+            "    tools/spec-block closing >> <spec-file>\n\n"
+            "Then include the spec in the dispatch, or name its tasks/specs/ path. If this message "
+            "commissions no work, add the literal marker [no-spec]."
+        )
+
+    body = blob
+    for block in blocks.values():
+        body = body.replace(norm(block), " ")
+    body = body.lower()
+
+    if any(re.search(p, body, re.M) for p in heavy_patterns(checker_only)):
+        deny(
+            "Blocked by writespec-guard: this spec instructs the implementer to run a checker-only "
+            "command (" + ", ".join(f"`{c}`" for c in checker_only) + ").\n\n"
+            "Those belong to the checker, which runs the full baseline once on the integration "
+            "branch (docs/workflows/delegation.md step 13). State the literal counts so 'no worse' "
+            "stays checkable, but let the appended baseline block say what to run. Quote the "
+            "numbers; do not instruct the commands."
+        )
+
+    if "[implementer-tests]" not in text and any(re.search(p, body) for p in TEST_COMMISSION_PATTERNS):
+        deny(
+            "Blocked by writespec-guard: this spec appears to ask the implementer to write its own "
+            "tests.\n\n"
+            "docs/workflows/delegation.md puts verification on the checker, in one loop, on the "
+            "integration branch. Implementer-written tests duplicate that work and encode the same "
+            "blind spots, so a green suite can report success over a clause that was never built.\n\n"
+            "Rewrite the spec so the implementer only confirms the code runs and the existing suite "
+            "still passes, and derive coverage yourself under `speccheck`. If this ticket genuinely "
+            "needs implementer-authored tests, state the reason in the spec and add the literal "
+            "marker [implementer-tests]."
+        )
+
+    allow()
+
+
+if __name__ == "__main__":
+    main()

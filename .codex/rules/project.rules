@@ -1,0 +1,8 @@
+# Project-specific Codex command rules. The agent kit writes kit.rules next to this file and never
+# touches this one. Example:
+#
+# prefix_rule(
+#     pattern = ["supabase", "db", "push"],
+#     decision = "forbidden",
+#     justification = "Remote migrations are the user's to run",
+# )

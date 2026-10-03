@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+"""Print one fixed writespec block, to append verbatim to a delegation spec.
+
+    tools/spec-block baseline >> tasks/specs/<spec>.md
+    tools/spec-block scope    >> tasks/specs/<spec>.md
+    tools/spec-block closing  >> tasks/specs/<spec>.md
+
+`scope` and `closing` are fixed text from the writespec skill. `baseline` is rendered from the
+[implementer] section of docs/project_profile.md, so it names this project's commands.
+tools/writespec-guard renders the same text to check a dispatch, so never edit the output by hand.
+"""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import agent_profile  # noqa: E402
+
+if len(sys.argv) != 2 or sys.argv[1] not in ("baseline", "scope", "closing"):
+    agent_profile.die("Usage: tools/spec-block baseline|scope|closing", 64)
+try:
+    sys.stdout.write(agent_profile.render_block(sys.argv[1]))
+except agent_profile.ProfileError as exc:
+    agent_profile.die(f"spec-block: {exc}")

@@ -1,0 +1,13 @@
+# kit:begin core
+# Agent-client local state. Shared skills, settings and tools remain tracked.
+.worktrees/
+.codex-log/
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/agent-memory-local/
+# Working captures from a visual check; milestone captures and notes.md are committed.
+docs/visual/screenshots/*/work/
+# Windows alternate-data-stream files created when downloads are unpacked into WSL.
+*:Zone.Identifier
+__pycache__/
+# kit:end core

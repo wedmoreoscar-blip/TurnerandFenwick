@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Provision a delegated git worktree before an implementer is pointed at it.
+
+    tools/prepare-worktree <worktree> [--since <pre-merge-sha>] [--symlink]
+
+1. Copies (or with --symlink, links) [worktree].copy_files from the main checkout. A worktree has
+   tracked files only, and code that reads gitignored config at import time fails to load without
+   it, which reads as the implementer's breakage rather than a provisioning gap.
+2. Installs dependencies only when needed, under tools/agent-lock dependencies:
+   - a worktree with no installed marker gets [commands].install_fresh (must not rewrite the lockfile);
+   - with --since, a change to any [worktree].dependency_files gets [commands].install_incr;
+   - otherwise nothing.
+3. Runs [commands].test and reports the result, so the green count the implementer inherits is known.
+
+See docs/workflows/delegation.md, step 3.
+"""
+import argparse
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import agent_profile  # noqa: E402
+
+MARKER = ".agent-provisioned"
+
+
+def main_checkout(worktree: Path) -> Path:
+    out = subprocess.run(["git", "-C", str(worktree), "worktree", "list", "--porcelain"],
+                         capture_output=True, text=True, check=True).stdout
+    first = next(line for line in out.splitlines() if line.startswith("worktree "))
+    return Path(first.split(" ", 1)[1])
+
+
+def run(command: str, cwd: Path, lock: bool) -> int:
+    if lock:
+        lock_tool = agent_profile.ROOT / "tools" / "agent-lock"
+        argv = [str(lock_tool), "dependencies", "--", "sh", "-c", command]
+        print(f"RUN  (locked) {command}", flush=True)
+        return subprocess.run(argv, cwd=cwd).returncode
+    print(f"RUN  {command}", flush=True)
+    return subprocess.run(command, shell=True, cwd=cwd).returncode
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("worktree")
+    parser.add_argument("--since")
+    parser.add_argument("--symlink", action="store_true")
+    args = parser.parse_args()
+    worktree = Path(args.worktree).resolve()
+    try:
+        data = agent_profile.load(main_checkout(worktree))
+    except (agent_profile.ProfileError, subprocess.CalledProcessError, StopIteration) as exc:
+        agent_profile.die(f"prepare-worktree: {exc}")
+    main = main_checkout(worktree)
+    if main == worktree:
+        agent_profile.die("prepare-worktree: that is the main checkout, not a delegated worktree")
+    commands = data["commands"]
+    wt = data.get("worktree", {})
+
+    for rel in wt.get("copy_files", []):
+        src, dest = main / rel, worktree / rel
+        if not src.exists():
+            print(f"WARN {rel} does not exist in the main checkout; not copied")
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.exists() or dest.is_symlink():
+            dest.unlink()
+        if args.symlink:
+            dest.symlink_to(src)
+        else:
+            shutil.copy2(src, dest)
+        print(f"{'LINK' if args.symlink else 'COPY'} {rel}")
+
+    install = None
+    if not (worktree / ".git").exists():
+        agent_profile.die("prepare-worktree: not a git worktree")
+    marker = Path(subprocess.run(["git", "-C", str(worktree), "rev-parse", "--git-dir"],
+                                 capture_output=True, text=True, check=True).stdout.strip())
+    if not marker.is_absolute():
+        marker = worktree / marker
+    marker = marker / MARKER
+    if not marker.exists():
+        install = "install_fresh"
+    elif args.since:
+        deps = wt.get("dependency_files", [])
+        changed = subprocess.run(
+            ["git", "-C", str(worktree), "diff", "--name-only", args.since, "HEAD", "--", *deps],
+            capture_output=True, text=True, check=True).stdout.strip() if deps else ""
+        if changed:
+            install = "install_incr"
+    if install:
+        if install not in commands:
+            print(f"SKIP {install}: not defined in [commands]")
+        elif run(commands[install], worktree, lock=True) != 0:
+            agent_profile.die(f"FAIL {install}")
+    else:
+        print("SKIP install: dependency set unchanged")
+    marker.write_text("provisioned\n")
+
+    if "test" in commands:
+        code = run(commands["test"], worktree, lock=False)
+        print(("PASS" if code == 0 else "FAIL") + " test: record the count above in the spec")
+        return code
+    print("SKIP test: no [commands].test")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

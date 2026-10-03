@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Mutual exclusion for jobs that must never overlap (installs, the dev server, benchmarks).
+# Fails fast with exit 75 instead of queueing: it is a guard, not a scheduler.
+set -euo pipefail
+
+usage() {
+  echo "Usage: tools/agent-lock <scope> -- <command> [args...]" >&2
+  echo "Scopes: dependencies, dev-server, services, benchmark, resource-heavy" >&2
+}
+
+if [[ $# -lt 3 || "$2" != "--" ]]; then
+  usage
+  exit 64
+fi
+
+scope="$1"
+shift 2
+
+case "$scope" in
+  dependencies|dev-server|services|benchmark|resource-heavy) ;;
+  *)
+    echo "Unknown lock scope: $scope" >&2
+    usage
+    exit 64
+    ;;
+esac
+
+repo="$(basename "$(git -C "$(dirname "$0")" rev-parse --path-format=absolute --git-common-dir 2>/dev/null | sed 's#/\.git$##')" 2>/dev/null || echo project)"
+lock_file="${TMPDIR:-/tmp}/${repo:-project}.${scope}.lock"
+exec 9>"$lock_file"
+if ! flock -n 9; then
+  echo "Another job already holds $lock_file; wait for it to finish." >&2
+  exit 75
+fi
+
+exec "$@"

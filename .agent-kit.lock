@@ -1,0 +1,897 @@
+{
+  "_comment": "Written by `kit` from the agent kit. Records what the kit installed so kit and local edits can be told apart. Do not edit by hand.",
+  "kit_commit": "ee6cb68",
+  "packs": [
+    "core",
+    "traycer"
+  ],
+  "targets": [
+    "agents",
+    "claude"
+  ],
+  "units": {
+    ".agents/skills/audit-context/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/audit-context/SKILL.md",
+      "hash": "4e3f26977e6380ee"
+    },
+    ".agents/skills/audit-context/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/audit-context/agents/openai.yaml",
+      "hash": "b2a5fa8183ed9d69"
+    },
+    ".agents/skills/bench/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/bench/SKILL.md",
+      "hash": "aee6d59bf7bbb7a5"
+    },
+    ".agents/skills/bench/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/bench/agents/openai.yaml",
+      "hash": "58c1b813d21921f4"
+    },
+    ".agents/skills/decision-check/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/decision-check/SKILL.md",
+      "hash": "97c373bffa0f0db3"
+    },
+    ".agents/skills/decision-check/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/decision-check/agents/openai.yaml",
+      "hash": "9b784325359a7c62"
+    },
+    ".agents/skills/find-skills/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/find-skills/SKILL.md",
+      "hash": "3464363a6de1b86d"
+    },
+    ".agents/skills/find-skills/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/find-skills/agents/openai.yaml",
+      "hash": "2e063c1c2c30babb"
+    },
+    ".agents/skills/handoff/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/handoff/SKILL.md",
+      "hash": "35ffcf2e4fe0f820"
+    },
+    ".agents/skills/handoff/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/handoff/agents/openai.yaml",
+      "hash": "1b0f574fb74bda0b"
+    },
+    ".agents/skills/healthcheck/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/healthcheck/SKILL.md",
+      "hash": "43a3df51541b691e"
+    },
+    ".agents/skills/healthcheck/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/healthcheck/agents/openai.yaml",
+      "hash": "d14d89441c6977c4"
+    },
+    ".agents/skills/kickoff/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/kickoff/SKILL.md",
+      "hash": "69ebe2992080ee1b"
+    },
+    ".agents/skills/kickoff/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/kickoff/agents/openai.yaml",
+      "hash": "dc759ef7c53b9e88"
+    },
+    ".agents/skills/make-bench/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/make-bench/SKILL.md",
+      "hash": "fe6103c3c18e35f0"
+    },
+    ".agents/skills/make-bench/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/make-bench/agents/openai.yaml",
+      "hash": "e2996569a19b5a78"
+    },
+    ".agents/skills/skill-writing/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/skill-writing/SKILL.md",
+      "hash": "ea0ccabb6918bbcd"
+    },
+    ".agents/skills/skill-writing/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/skill-writing/agents/openai.yaml",
+      "hash": "72d6877545044c30"
+    },
+    ".agents/skills/speccheck/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/speccheck/SKILL.md",
+      "hash": "2a9cb8b360d4f4e4"
+    },
+    ".agents/skills/speccheck/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/speccheck/agents/openai.yaml",
+      "hash": "591cfc13c4e1e52f"
+    },
+    ".agents/skills/teacher/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/teacher/SKILL.md",
+      "hash": "21a850a5c9778956"
+    },
+    ".agents/skills/teacher/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/teacher/agents/openai.yaml",
+      "hash": "183a83ea55a70d63"
+    },
+    ".agents/skills/update-decisions/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/update-decisions/SKILL.md",
+      "hash": "45cadb0a687d86c1"
+    },
+    ".agents/skills/update-decisions/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/update-decisions/agents/openai.yaml",
+      "hash": "8e97aa90477c3b4b"
+    },
+    ".agents/skills/writespec/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/writespec/SKILL.md",
+      "hash": "442e90fe1dfad538"
+    },
+    ".agents/skills/writespec/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/writespec/agents/openai.yaml",
+      "hash": "a618cf868ba4a637"
+    },
+    ".agents/skills/writespec/blocks/baseline.md.tmpl": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/writespec/blocks/baseline.md.tmpl",
+      "hash": "846b83ac5aff0ba1"
+    },
+    ".agents/skills/writespec/blocks/closing.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/writespec/blocks/closing.md",
+      "hash": "d3f66fa9dd570ec7"
+    },
+    ".agents/skills/writespec/blocks/scope.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".agents/skills/writespec/blocks/scope.md",
+      "hash": "5f27e6852ab17402"
+    },
+    ".claude/settings.json#hooks/PreToolUse={\"hooks\": [{\"command\": \"\\\"${CLAUDE_PROJECT_DIR}/tools/spend-guard\\\"\", \"statusMessage\": \"Checking delegation spend ledger...\", \"timeout\": 10, \"type\": \"command\"}], \"matcher\": \"Bash\"}": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "41b7c05b113b1daa",
+      "keys": [
+        "hooks",
+        "PreToolUse"
+      ],
+      "value": {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR}/tools/spend-guard\"",
+            "timeout": 10,
+            "statusMessage": "Checking delegation spend ledger..."
+          }
+        ]
+      },
+      "mode": "item"
+    },
+    ".claude/settings.json#hooks/PreToolUse={\"hooks\": [{\"command\": \"\\\"${CLAUDE_PROJECT_DIR}/tools/writespec-guard\\\"\", \"statusMessage\": \"Checking writespec compliance...\", \"timeout\": 10, \"type\": \"command\"}], \"matcher\": \"Bash|Agent|Task\"}": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "d3f26701a76eee2e",
+      "keys": [
+        "hooks",
+        "PreToolUse"
+      ],
+      "value": {
+        "matcher": "Bash|Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR}/tools/writespec-guard\"",
+            "timeout": 10,
+            "statusMessage": "Checking writespec compliance..."
+          }
+        ]
+      },
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Bash(git -C * push *)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "79adcefd64bf600d",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Bash(git -C * push *)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Bash(git push *)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "490c4ea69f3d70da",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Bash(git push *)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Bash(git push)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "4a8584bd7e931cd0",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Bash(git push)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(**/.env)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "faa65e889d103936",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(**/.env)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(**/.env.development)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "5983a987f34ebe8f",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(**/.env.development)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(**/.env.local)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "e883e89fae290d55",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(**/.env.local)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(**/.env.production)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "853de09d4b005f82",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(**/.env.production)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(**/.env.staging)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "141c2a30c5e7aa08",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(**/.env.staging)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(**/.env.test)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "da9699f9a9652c43",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(**/.env.test)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(./.env)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "d32001d08b7e0990",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(./.env)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(./.env.development)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "22e3a927beedc729",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(./.env.development)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(./.env.local)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "995b1018b45dc15b",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(./.env.local)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(./.env.production)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "91f5b6c0f7f1aca0",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(./.env.production)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(./.env.staging)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "107ba8bef2ed06cb",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(./.env.staging)",
+      "mode": "item"
+    },
+    ".claude/settings.json#permissions/deny=\"Read(./.env.test)\"": {
+      "kind": "json",
+      "pack": "core",
+      "path": ".claude/settings.json",
+      "hash": "f77b1cedc0e2b918",
+      "keys": [
+        "permissions",
+        "deny"
+      ],
+      "value": "Read(./.env.test)",
+      "mode": "item"
+    },
+    ".claude/skills/audit-context/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/audit-context/SKILL.md",
+      "hash": "4e3f26977e6380ee"
+    },
+    ".claude/skills/audit-context/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/audit-context/agents/openai.yaml",
+      "hash": "b2a5fa8183ed9d69"
+    },
+    ".claude/skills/bench/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/bench/SKILL.md",
+      "hash": "aee6d59bf7bbb7a5"
+    },
+    ".claude/skills/bench/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/bench/agents/openai.yaml",
+      "hash": "58c1b813d21921f4"
+    },
+    ".claude/skills/decision-check/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/decision-check/SKILL.md",
+      "hash": "97c373bffa0f0db3"
+    },
+    ".claude/skills/decision-check/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/decision-check/agents/openai.yaml",
+      "hash": "9b784325359a7c62"
+    },
+    ".claude/skills/find-skills/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/find-skills/SKILL.md",
+      "hash": "3464363a6de1b86d"
+    },
+    ".claude/skills/find-skills/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/find-skills/agents/openai.yaml",
+      "hash": "2e063c1c2c30babb"
+    },
+    ".claude/skills/handoff/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/handoff/SKILL.md",
+      "hash": "35ffcf2e4fe0f820"
+    },
+    ".claude/skills/handoff/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/handoff/agents/openai.yaml",
+      "hash": "1b0f574fb74bda0b"
+    },
+    ".claude/skills/healthcheck/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/healthcheck/SKILL.md",
+      "hash": "43a3df51541b691e"
+    },
+    ".claude/skills/healthcheck/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/healthcheck/agents/openai.yaml",
+      "hash": "d14d89441c6977c4"
+    },
+    ".claude/skills/kickoff/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/kickoff/SKILL.md",
+      "hash": "69ebe2992080ee1b"
+    },
+    ".claude/skills/kickoff/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/kickoff/agents/openai.yaml",
+      "hash": "dc759ef7c53b9e88"
+    },
+    ".claude/skills/make-bench/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/make-bench/SKILL.md",
+      "hash": "fe6103c3c18e35f0"
+    },
+    ".claude/skills/make-bench/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/make-bench/agents/openai.yaml",
+      "hash": "e2996569a19b5a78"
+    },
+    ".claude/skills/skill-writing/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/skill-writing/SKILL.md",
+      "hash": "ea0ccabb6918bbcd"
+    },
+    ".claude/skills/skill-writing/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/skill-writing/agents/openai.yaml",
+      "hash": "72d6877545044c30"
+    },
+    ".claude/skills/speccheck/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/speccheck/SKILL.md",
+      "hash": "2a9cb8b360d4f4e4"
+    },
+    ".claude/skills/speccheck/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/speccheck/agents/openai.yaml",
+      "hash": "591cfc13c4e1e52f"
+    },
+    ".claude/skills/teacher/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/teacher/SKILL.md",
+      "hash": "21a850a5c9778956"
+    },
+    ".claude/skills/teacher/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/teacher/agents/openai.yaml",
+      "hash": "183a83ea55a70d63"
+    },
+    ".claude/skills/update-decisions/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/update-decisions/SKILL.md",
+      "hash": "45cadb0a687d86c1"
+    },
+    ".claude/skills/update-decisions/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/update-decisions/agents/openai.yaml",
+      "hash": "8e97aa90477c3b4b"
+    },
+    ".claude/skills/writespec/SKILL.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/writespec/SKILL.md",
+      "hash": "442e90fe1dfad538"
+    },
+    ".claude/skills/writespec/agents/openai.yaml": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/writespec/agents/openai.yaml",
+      "hash": "a618cf868ba4a637"
+    },
+    ".claude/skills/writespec/blocks/baseline.md.tmpl": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/writespec/blocks/baseline.md.tmpl",
+      "hash": "846b83ac5aff0ba1"
+    },
+    ".claude/skills/writespec/blocks/closing.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/writespec/blocks/closing.md",
+      "hash": "d3f66fa9dd570ec7"
+    },
+    ".claude/skills/writespec/blocks/scope.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": ".claude/skills/writespec/blocks/scope.md",
+      "hash": "5f27e6852ab17402"
+    },
+    ".codex/config.toml#traycer-settings": {
+      "kind": "region",
+      "pack": "traycer",
+      "path": ".codex/config.toml",
+      "hash": "c96a40ea3619ab4c",
+      "name": "traycer-settings",
+      "style": "hash"
+    },
+    ".codex/rules/kit.rules": {
+      "kind": "generated",
+      "pack": "core",
+      "path": ".codex/rules/kit.rules",
+      "hash": "6afefcf5d182532c"
+    },
+    ".gitignore#core": {
+      "kind": "region",
+      "pack": "core",
+      "path": ".gitignore",
+      "hash": "30fb76faa2d8bb23",
+      "name": "core",
+      "style": "hash"
+    },
+    "AGENTS.md#core": {
+      "kind": "region",
+      "pack": "core",
+      "path": "AGENTS.md",
+      "hash": "e51db5bd9b252179",
+      "name": "core",
+      "style": "md"
+    },
+    "AGENTS.md#traycer": {
+      "kind": "region",
+      "pack": "traycer",
+      "path": "AGENTS.md",
+      "hash": "af3a3c1430150bac",
+      "name": "traycer",
+      "style": "md"
+    },
+    "ORCHESTRATION.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "ORCHESTRATION.md",
+      "hash": "964fdffb7fb6d709"
+    },
+    "docs/agent_setup/BOOTSTRAP_PROMPT.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/agent_setup/BOOTSTRAP_PROMPT.md",
+      "hash": "ef05d0a8f4938347"
+    },
+    "docs/agent_setup/CLAUDE_CODE_SETUP.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/agent_setup/CLAUDE_CODE_SETUP.md",
+      "hash": "082df681d72d2bae"
+    },
+    "docs/agent_setup/CODEX_SETUP.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/agent_setup/CODEX_SETUP.md",
+      "hash": "4f0dfbcb15faa8f9"
+    },
+    "docs/agent_setup/CROSS_MACHINE_SETUP.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/agent_setup/CROSS_MACHINE_SETUP.md",
+      "hash": "6f9b29d84b850d92"
+    },
+    "docs/agent_setup/SKILL_CATALOG.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/agent_setup/SKILL_CATALOG.md",
+      "hash": "c4bd93be34803077"
+    },
+    "docs/workflows/agent_selection.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/agent_selection.md",
+      "hash": "81bc62a5efe394c3"
+    },
+    "docs/workflows/benchmarking.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/benchmarking.md",
+      "hash": "9117e7d218398bc7"
+    },
+    "docs/workflows/change_safety.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/change_safety.md",
+      "hash": "58daec77352fbd99"
+    },
+    "docs/workflows/context_audit.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/context_audit.md",
+      "hash": "ff2a427ecbdceb14"
+    },
+    "docs/workflows/delegation.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/delegation.md",
+      "hash": "2330fc6ec74960cb"
+    },
+    "docs/workflows/delegation_traycer.md": {
+      "kind": "file",
+      "pack": "traycer",
+      "path": "docs/workflows/delegation_traycer.md",
+      "hash": "f6012e59f1114f00"
+    },
+    "docs/workflows/session_lifecycle.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/session_lifecycle.md",
+      "hash": "85acfef189c8f5e0"
+    },
+    "docs/workflows/skill_authoring.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/skill_authoring.md",
+      "hash": "897154d6255bd4b6"
+    },
+    "docs/workflows/verification.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/verification.md",
+      "hash": "88e7bc375f64bcfc"
+    },
+    "docs/workflows/visual_check.md": {
+      "kind": "file",
+      "pack": "core",
+      "path": "docs/workflows/visual_check.md",
+      "hash": "b22efa5293e96962"
+    },
+    "opencode.json#permission/bash/git -C * push *=git -C * push *": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "bash",
+        "git -C * push *"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/bash/git push *=git push *": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "bash",
+        "git push *"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/bash/git push=git push": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "bash",
+        "git push"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/read/*.env.development=*.env.development": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "read",
+        "*.env.development"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/read/*.env.local=*.env.local": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "read",
+        "*.env.local"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/read/*.env.production=*.env.production": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "read",
+        "*.env.production"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/read/*.env.staging=*.env.staging": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "read",
+        "*.env.staging"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/read/*.env.test=*.env.test": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "read",
+        "*.env.test"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "opencode.json#permission/read/*.env=*.env": {
+      "kind": "json",
+      "pack": "core",
+      "path": "opencode.json",
+      "hash": "d2a00b488ac37424",
+      "keys": [
+        "permission",
+        "read",
+        "*.env"
+      ],
+      "value": "deny",
+      "mode": "key"
+    },
+    "tools/agent-lock": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/agent-lock",
+      "hash": "af6f0764aea13078"
+    },
+    "tools/agent_profile.py": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/agent_profile.py",
+      "hash": "aa804d77316203fa"
+    },
+    "tools/check-agent-setup": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/check-agent-setup",
+      "hash": "460c1ea8719d694d"
+    },
+    "tools/check_agent_setup_traycer.py": {
+      "kind": "file",
+      "pack": "traycer",
+      "path": "tools/check_agent_setup_traycer.py",
+      "hash": "d7d7d7ebcbb6dfe5"
+    },
+    "tools/prepare-worktree": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/prepare-worktree",
+      "hash": "e608dad58bd7d051"
+    },
+    "tools/spec-block": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/spec-block",
+      "hash": "bb1df6032a962ad8"
+    },
+    "tools/spend-guard": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/spend-guard",
+      "hash": "2d635b61af98a48a"
+    },
+    "tools/test-project": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/test-project",
+      "hash": "f18aa4d295d83d52"
+    },
+    "tools/writespec-guard": {
+      "kind": "file",
+      "pack": "core",
+      "path": "tools/writespec-guard",
+      "hash": "4263f7876438f6a4"
+    },
+    "tools/writespec_guard_traycer.py": {
+      "kind": "file",
+      "pack": "traycer",
+      "path": "tools/writespec_guard_traycer.py",
+      "hash": "fd1f089e0412c721"
+    }
+  }
+}

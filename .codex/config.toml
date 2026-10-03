@@ -1,0 +1,14 @@
+# Shared Codex defaults for trusted clones of this repository. Authentication and personal
+# preferences (model, effort) stay in each user's ~/.codex/config.toml.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[agents]
+enabled = true
+
+# kit:begin traycer-settings
+# The Traycer CLI reaches its local host service over the network, so a sandbox without network
+# access fails every `traycer` call while filesystem work still succeeds.
+[sandbox_workspace_write]
+network_access = true
+# kit:end traycer-settings

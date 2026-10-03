@@ -1,0 +1,374 @@
+# PROJECT_PLAN.md: Menswear storefront for Ben Turner
+
+Status: planning complete, build not started. Last updated 2026-10-03.
+
+## 0. Read this first (instructions for coding agents)
+
+This file is the source of truth for what is being built and why. Read all of it before starting any task.
+
+- Sections marked **LOCKED** are decided. Do not change them without asking Oscar.
+- Sections marked **OPEN** are deliberately undecided. Do not build them, do not pick a provider for them, and do not write code that assumes an answer. If a task depends on an open thread, stop and ask.
+- Build in the phase order in section 12. Do not start a phase until the previous phase's acceptance criteria pass.
+- Use the Medusa docs MCP server (`https://docs.medusajs.com/mcp`) or `https://docs.medusajs.com/llms.txt` for current Medusa APIs and config syntax. Medusa v2 changes often; check rather than recall.
+- Any work on the storefront's look must follow `docs/UI_OVERHAUL_SKILL.md` (see section 9).
+- Product images in this shop are real photos of real second-hand garments. Never generate, edit or "enhance" product photos with AI.
+
+Suggested repo layout:
+
+```
+/backend        Medusa v2 server (shop logic, admin dashboard, custom routes, jobs)
+/storefront     Next.js storefront (Medusa's official starter, restyled)
+/docs           PROJECT_PLAN.md, UI_OVERHAUL_SKILL.md
+/design         references, mockups, direction notes (created by the UI overhaul process)
+CLAUDE.md       short pointer: "Read docs/PROJECT_PLAN.md before any task."
+```
+
+Paths below are prefixed `backend/` or `storefront/` because both projects have a `src/modules` folder and they mean different things.
+
+## 1. Goal
+
+A professional online shop for Ben Turner's menswear: suits and high-quality tailoring, sold as one-off second-hand pieces. The site is the master inventory. In a later phase it syncs with eBay and Vinted so an item never sells twice.
+
+Priorities, in order:
+
+1. Looks professional and distinctive (English tailoring, slightly irreverent). Must not look AI-generated or templated.
+2. Correct, safe commerce: payments, stock, orders, accounts.
+3. Cheap to run. Free and open-source software wherever possible.
+4. Few moving parts. Do not add a service or library when an existing piece already covers the need.
+5. Do not build from scratch what Medusa already provides.
+
+## 2. People and roles
+
+| Person | Role | Access |
+|---|---|---|
+| Oscar | Developer. Builds mostly with AI coding tools (Claude Code). Familiar with Supabase, new to Medusa. | Medusa admin, Supabase, all infra |
+| Ben Turner | Seller and client. Uploads listings, answers customer queries, writes blog content. Non-technical. | Medusa admin only |
+| Customers | Browse, buy, send queries. | Registered account or guest checkout |
+
+Ben's admin experience must stay in one place: the Medusa admin dashboard. He should never need to log in to Supabase.
+
+## 3. Starting point
+
+- An existing barebones WordPress + WooCommerce install with Stripe configured. It has no products or content. **It is abandoned. Nothing is migrated.**
+- An existing Stripe account. Reuse it. Use Stripe **test mode keys** for all development.
+- Ben owns the domain. It is not pointed at any host yet. Ben's domain came bundled with a hosting service whose type is unknown (see open threads).
+- Oscar has previously built, on Supabase, a read-only feedback submissions page visible only to admins, with an email address synced into it. That pattern is the basis for the inbox (section 7.6).
+
+## 4. Architecture (LOCKED)
+
+```
+Customer browser
+      │
+      ▼
+Next.js storefront ─────────── calls Medusa Store API (/store/*) via @medusajs/js-sdk
+      │
+      ▼
+Medusa v2 server ──────────── Redis (production only: events, workflows, locking, cache)
+  • shop logic + admin dashboard
+  • custom API routes, admin pages, scheduled jobs, subscribers
+      │
+      ├── Supabase Postgres  (Medusa's tables + our own `app` schema)
+      ├── Supabase Storage   (product images via S3 provider; blog + inbox files)
+      ├── Stripe             (payments, via Medusa's Stripe provider)
+      └── Gmail SMTP         (outbound email, via a custom notification provider)
+```
+
+### What each piece does and does not do
+
+| Piece | Does | Does not |
+|---|---|---|
+| Medusa v2 | Products, variants, collections, categories, stock, carts, checkout, orders, returns, refunds, tax regions, shipping options, customer accounts, guest checkout, admin users, admin dashboard, Store and Admin APIs, scheduled jobs, event subscribers, custom modules and routes | Store data itself (needs Postgres), host a storefront, send email without a provider, blogs, email inboxes |
+| Next.js storefront | Everything customers see. Starts as Medusa's official Next.js starter. | Talk to the database directly. All shop data comes through Medusa's Store API. |
+| Supabase | Postgres database for Medusa and our own tables. Storage for images and attachments. pg_cron for Supabase-only housekeeping. | Shop logic. Customer or admin login (Medusa owns identity). Host Medusa (Medusa needs an always-on server). |
+| Redis | Medusa's event queue, workflow engine, locks and cache in production | Store shop data |
+| Stripe | Card payments, refunds, payment confirmation webhooks | Order or stock logic |
+
+## 5. Data and identity rules (LOCKED, non-negotiable)
+
+1. **Medusa owns its tables.** Never write to Medusa's tables with raw SQL, pg_cron, Supabase client libraries or Edge Functions. All changes to products, stock, orders and customers go through Medusa (Admin API, workflows or module services). Raw writes skip Medusa's workflows (stock reservations, totals, events) and corrupt state.
+2. **Our own data lives in a separate Postgres schema called `app`.** Blog posts, inbox threads, messages, attachments metadata and site settings go there.
+3. **Lock down Supabase's Data API.** In Supabase settings, remove `public` from the exposed schemas so Medusa's tables cannot be reached with the anon key. Expose only `app`. Enable row-level security on every `app` table. Write no policies for `anon` or `authenticated` unless a task in this file explicitly requires one.
+4. **Only server-side code touches `app`.** The Medusa server and Supabase Edge Functions use the Supabase service-role key. The service-role key never appears in the storefront, in browser code or in any `NEXT_PUBLIC_*` variable.
+5. **Medusa handles all identity.** Admin users (Ben, Oscar) and customers authenticate through Medusa. Do not use Supabase Auth.
+6. **The storefront reads custom content through Medusa.** Blog posts and curation content are served by custom Medusa store routes (`/store/...`), so the storefront has one API to talk to and holds no Supabase keys.
+7. **Database connection:** Medusa connects to Supabase through the **session-mode pooler** connection string (port 5432). Supabase's direct connection is IPv6-only and fails on many hosts. Do not use the transaction-mode pooler for Medusa. Supabase requires SSL; configure Medusa's database driver options to match.
+
+## 6. Customer accounts and roles (LOCKED)
+
+- Full customer account creation: register, log in, log out, profile, saved addresses, order history, **password reset**.
+- Guest checkout also available. A guest's order must work end to end without an account.
+- Medusa's `emailpass` auth provider for customers and admins.
+- Admin access is Medusa admin users only (Ben and Oscar). No other roles in v1.
+- The starter storefront may not include a password-reset flow. If it doesn't, build it (request page and reset page) following Medusa's storefront docs. The reset email is sent by a subscriber to Medusa's password-reset event (section 7.7).
+
+## 7. Feature set (v1)
+
+### 7.1 Storefront pages
+
+The starter provides routes under `storefront/src/app/[countryCode]/...` (home, store, categories, collections, products, cart, checkout, account, order confirmation). Keep the starter's routing and country-code URL scheme in v1. Do not restructure routing to remove the country code.
+
+| Page | Source | Notes |
+|---|---|---|
+| Home | starter, restyled | Editorial feel. Features the current curation and recent journal posts. |
+| Shop (all items) | starter `store` page | Filter by category and size. Hide sold items from the listing. |
+| Category and collection pages | starter | |
+| Product page | starter, extended | Adds measurements table, condition grade, flaw notes, "Ask about this item" button. Sold items stay reachable at their URL and show a clear Sold state. |
+| Current curation | new | See 7.4 |
+| Journal (blog) index and post pages | new | See 7.5 |
+| Contact / enquiry | new | See 7.6 |
+| Cart, checkout, order confirmation | starter | Restyle only. Behaviour must not change. |
+| Account (login, register, reset password, profile, addresses, orders) | starter + reset flow | |
+| Static pages: About, Delivery and returns, Privacy, Terms | new | Content from Ben |
+
+Region: United Kingdom, currency GBP. Set `NEXT_PUBLIC_DEFAULT_REGION=gb`. Shipping zones and international selling are content inputs from Ben (section 14).
+
+### 7.2 Product model for one-off second-hand items
+
+- Each listing is one Medusa product with one variant, `manage_inventory` on, stock quantity 1.
+- Each variant has a unique, permanent SKU. The sync engine (Phase 6) relies on SKUs never changing.
+- When stock reaches 0, the item is sold everywhere on this site.
+- Tailoring buyers want full measurements, so every listing carries structured fields stored in product `metadata` under fixed keys:
+
+| Key | Applies to | Example |
+|---|---|---|
+| `labelled_size` | all | `40R` |
+| `brand` | all | `Hackett` |
+| `composition` | all | `100% wool` |
+| `condition_grade` | all | one of `new_with_tags`, `excellent`, `very_good`, `good`, `fair` |
+| `flaws` | all | free text |
+| `m_chest_pit_to_pit_cm` | jackets, shirts | `54` |
+| `m_shoulder_cm` | jackets | `46` |
+| `m_sleeve_cm` | jackets, shirts | `64` |
+| `m_back_length_cm` | jackets | `76` |
+| `m_waist_cm` | trousers | `86` |
+| `m_inside_leg_cm` | trousers | `81` |
+| `m_rise_cm` | trousers | `28` |
+| `m_hem_cm` | trousers | `20` |
+| `m_collar_cm` | shirts | `40` |
+
+The keys are a starting point. Confirm the final list with Ben before building the form.
+
+- Build a Medusa **admin widget** on the product details page (`backend/src/admin/widgets/`) that edits these fields as a proper form, so Ben never edits raw key-value metadata.
+- The storefront product page renders a measurements table from these keys, showing only keys that have values.
+
+### 7.3 Admin (Medusa dashboard)
+
+Built in: products, image upload, collections, categories, stock, orders, refunds, customers, admin users.
+
+Custom additions, all inside the Medusa admin so Ben has one login:
+
+| Addition | Type | Location |
+|---|---|---|
+| Measurements and condition form | widget | `backend/src/admin/widgets/` |
+| Journal editor | UI route | `backend/src/admin/routes/journal/` |
+| Inbox | UI route | `backend/src/admin/routes/inbox/` |
+| Current curation picker | widget or UI route | see 7.4 |
+
+Admin UI routes call custom Admin API routes in `backend/src/api/admin/...`, which read and write the `app` schema with the service-role key.
+
+### 7.4 Current curation
+
+- A curation is a Medusa **product collection** plus an intro text and cover image.
+- Store the intro, cover image path and an `is_current_curation` flag in the collection's `metadata`.
+- Exactly one collection is current at a time. The admin picker enforces this.
+- Storefront route (for example `/[countryCode]/curation`) shows the current curation. Each past curation stays reachable via its collection page.
+
+### 7.5 Journal (blog)
+
+Table `app.posts`:
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid pk | |
+| slug | text unique | |
+| title | text | |
+| excerpt | text | |
+| body_markdown | text | Markdown, rendered on the storefront |
+| cover_image_path | text | Supabase Storage path, bucket `journal` (public) |
+| status | text | `draft` or `published` |
+| published_at | timestamptz | |
+| related_product_ids | text[] | optional Medusa product ids |
+| created_at, updated_at | timestamptz | |
+
+- Admin editor: Markdown editor with preview and image upload to the `journal` bucket.
+- Storefront reads published posts via a custom store route (for example `GET /store/journal` and `GET /store/journal/:slug`).
+- Use Next.js on-demand revalidation (the starter already has `REVALIDATE_SECRET`) so publishing a post updates the site without a rebuild.
+- The section name "Journal" is a placeholder until Ben confirms.
+
+### 7.6 Customer enquiries and admin inbox
+
+Customers contact the shop through a contact form (general) or an "Ask about this item" button (linked to a product). The official Gmail address also receives email directly. All of it lands in one inbox inside the Medusa admin, where Ben reads threads and replies, with image attachments both ways.
+
+Tables in `app`:
+
+- `threads`: id, customer_email, customer_name, subject, product_id (nullable), status (`open` / `closed`), gmail_thread_id (nullable), last_message_at, created_at
+- `messages`: id, thread_id, direction (`inbound` / `outbound`), sender, body_text, body_html, gmail_message_id (nullable), sent_at
+- `attachments`: id, message_id, storage_path, mime_type, size_bytes
+
+Attachments go in a **private** Supabase Storage bucket `inbox`. The admin views them through short-lived signed URLs generated by the Admin API route.
+
+Flows:
+
+1. **Storefront form:** `POST /store/enquiries` (custom route) creates a thread and message, and sends an acknowledgement email to the customer. Spam protection in v1: honeypot field plus server-side rate limit per IP and email.
+2. **Inbound email to the official Gmail address:** reuse the email-to-Supabase pattern from Oscar's existing feedback page. **Agents: ask Oscar for that implementation before building this flow.** Inbound emails become messages on the matching thread (matched by Gmail thread id or reply headers) or a new thread.
+3. **Admin reply:** Ben writes a reply (with optional images) in the inbox UI. The Admin API route sends it via Gmail SMTP with correct `In-Reply-To` and `References` headers so it threads in the customer's mail client, then stores it as an outbound message.
+
+This inbox replaces the need for a CRM in v1. No CRM is planned.
+
+### 7.7 Outbound email (LOCKED for v1: no paid email service)
+
+- Build a **custom Medusa notification module provider** (email channel) that sends through SMTP using `nodemailer`, authenticated as the official Gmail address with an app password.
+- Emails in v1: order confirmation, order shipped, password reset, enquiry acknowledgement, inbox replies.
+- Keep templates simple, plain HTML, styled to match the brand palette and fonts (with safe fallbacks).
+- Stripe can also send its own payment receipts. Decide with Ben whether to enable them to avoid duplicate emails.
+- Resend is a possible future replacement (OPEN thread). Write the provider behind Medusa's notification interface so swapping providers is a config change.
+
+### 7.8 Payments (LOCKED)
+
+- Medusa's built-in Stripe payment provider, enabled for the GB region.
+- Test keys during development. Live keys only at launch, set by Oscar.
+- Stripe webhook points at the Medusa server's Stripe hook endpoint. In local development use the Stripe CLI to forward webhooks.
+- The starter's `NEXT_PUBLIC_MEDUSA_PAYMENTS_*` variables relate to Medusa Cloud payments. Leave them empty.
+- Style the Stripe Payment Element through Stripe's Appearance API (variables for colours, fonts, radii), never through CSS overrides of Stripe's iframe.
+
+### 7.9 Inventory sync engine (Phase 6, deliberately last)
+
+Goal: when an item sells on any channel, it is marked sold everywhere else.
+
+- **Do not build any sync code before Phase 6.** Everything else must be working first.
+- eBay: official APIs (listing management and order notifications).
+- Vinted: **OPEN.** Vinted has no public API and no sanctioned way to create listings programmatically, and actively blocks automation. Automating it risks Ben's Vinted account. The extent (fully automatic, semi-manual where Ben lists by hand and the system only marks items sold, or excluded) is decided at the start of Phase 6.
+- Implementation home (LOCKED default): **Medusa scheduled jobs and event subscribers in TypeScript** inside the backend (`backend/src/jobs/`, `backend/src/subscribers/`). An `order.placed` subscriber triggers delisting elsewhere. Scheduled jobs poll channels that have no webhooks. All stock changes go through Medusa.
+- Exception: if Phase 6 concludes that Vinted needs headless-browser automation, that part may move to a separate worker process, because running a browser inside the Medusa server is heavy. Decide then.
+- Mapping between Medusa variants and external listings will likely be a custom Medusa module linked to product variants. Design it in Phase 6.
+- Expect race conditions (two channels selling in the same minute). Phase 6 must define how oversells are detected and handled.
+
+## 8. Aesthetic (LOCKED direction, details refined in the UI overhaul)
+
+Brief from Ben: English tailoring, "a slightly irreverent angle on tailoring", colours like burgundy, dark brown and cream, fonts "of a similar ilk", curated feel. Shorthand: the Kingsman look (Ben agreed, from images).
+
+Reference brands (study their principles, never copy their assets, logos, copy or exact layouts):
+
+- https://rowingblazers.com/
+- https://www.hackett.com/uk/en_gb/
+- https://therake.com/
+- https://www.peterchristian.co.uk/journal/our-story/
+
+Candidate tokens (starting values, finalised in the UI overhaul's direction stage):
+
+| Role | Candidate |
+|---|---|
+| Background (cream) | `#F1E8D6` |
+| Text (dark brown) | `#2E211A` |
+| Accent (burgundy) | `#6B1F2A` |
+| Secondary accent (to test) | bottle green `#1F3A2E` or brass `#A88A4E` |
+| Muted text | a tinted brown, never neutral grey |
+
+Typography candidates (all free, SIL Open Font License via Google Fonts): display serif such as Cormorant Garamond or Libre Caslon Display; body in a readable serif (for example EB Garamond) or a deliberately chosen humanist sans. Avoid Playfair Display and Inter (overused). One or two families only.
+
+Known risk: cream background plus serif display is one of the most common AI-generated design defaults. Distinctiveness has to come from the burgundy and brown palette (not terracotta), specific typefaces, layout rhythm, photography treatment and Ben's written voice. The UI overhaul process handles this.
+
+Photography: consistent, not professional. Same backdrop, same light, same framing for every item. AI imagery is allowed only for atmosphere (for example a homepage banner) and never depicts items for sale.
+
+Copy: the irreverent angle comes from Ben's writing in product descriptions and the journal. Use clear, plain interface copy everywhere else.
+
+## 9. UI work and the UI overhaul skill
+
+The starter's look (Medusa UI components, `@medusajs/ui-preset` Tailwind preset, grey palette) reads as a software dashboard. Recolouring alone will not reach the brief. Expect to replace the starter's visual components while keeping their behaviour.
+
+**Whenever the storefront needs to match the aesthetic (Phase 4, and any later UI work), use the UI overhaul skill described in `docs/UI_OVERHAUL_SKILL.md`.** If the skill has not been packaged yet, follow that document's manual process. It covers design references, direction and mockup generation, and the behaviour lock that keeps every feature working.
+
+Behaviour lock summary (full rules in the skill doc):
+
+- Restyle freely: `storefront/src/modules/**`, `storefront/src/styles/**`, `storefront/tailwind.config.js`, `storefront/public/**`.
+- Do not modify during UI work: `storefront/src/lib/**` (data layer: cart, products, customer, payment, regions), `storefront/src/middleware.ts`, `next.config.js` (except image remote patterns), environment files.
+- Handle with care: `storefront/src/modules/checkout/components/payment*` contains Stripe Elements wiring. Restyle containers only.
+- Preserve every `data-testid` (the starter has around 300), form field `name`, event handler and server action call.
+- The Playwright suite (Phase 2) must pass before and after every UI pass.
+
+## 10. Infrastructure
+
+### 10.1 Local development (LOCKED)
+
+- Node version per Medusa's requirement (`^20.19.0 || >=22.12.0`).
+- Two Supabase projects: `dev` and `prod` (free tier allows this). Development uses `dev`.
+- Locally, Medusa may use its default in-memory event bus, workflow engine and locking. Redis modules are configured for production only.
+- Stripe CLI for webhook forwarding.
+- `next.config.js` image `remotePatterns` must include the Supabase Storage hostname so `next/image` can load product photos.
+
+### 10.2 Production hosting (OPEN)
+
+Working assumption, not yet confirmed: Medusa server, storefront and Redis as three services on Railway, with a hard spending limit set; Supabase free tier for database and storage. Facts already established:
+
+- Vercel's free Hobby plan forbids commercial use, so it is excluded for this shop.
+- Medusa cannot run on Supabase, Vercel serverless or typical shared hosting.
+- Ben's bundled hosting is probably shared PHP hosting and unsuitable for Medusa. Unconfirmed.
+
+Do not write deployment config for any host until this thread is closed.
+
+### 10.3 Environment variables (indicative; confirm names against current Medusa docs)
+
+Backend: `DATABASE_URL` (Supabase session pooler), `REDIS_URL` (production), `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `JWT_SECRET`, `COOKIE_SECRET`, `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, S3 variables for Supabase Storage (endpoint, region, bucket, access key id, secret, public file URL), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `STOREFRONT_URL`.
+
+Storefront: `MEDUSA_BACKEND_URL`, `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`, `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_DEFAULT_REGION=gb`, `NEXT_PUBLIC_STRIPE_KEY`, `REVALIDATE_SECRET`.
+
+Never commit secrets. Provide `.env.template` files with empty values.
+
+## 11. Medusa configuration checklist (Phase 1)
+
+- Database: Supabase `dev` project via session pooler, SSL configured.
+- File module: S3 file provider pointed at Supabase Storage's S3-compatible endpoint. Public bucket `products` for product images.
+- Payment module: Stripe provider.
+- Notification module: custom SMTP provider (section 7.7) on the email channel.
+- Production-only: Redis event bus, Redis workflow engine, Redis (or Postgres) locking, Redis caching. Medusa ships `event-bus-redis`, `workflow-engine-redis`, `locking-redis`, `locking-postgres` and `caching-redis` modules. Check current docs for exact config keys.
+- Region: GB, GBP, Stripe enabled, tax settings per Ben's VAT status.
+- Sales channel and publishable API key for the storefront.
+- Shipping options per Ben's rates.
+
+## 12. Build phases
+
+| Phase | Scope | Acceptance criteria |
+|---|---|---|
+| 0. Scaffold | Create Medusa backend and Next.js starter (`create-medusa-app` offers the storefront). Arrange into the repo layout in section 0. Root `CLAUDE.md` pointer. Supabase `dev` project created. | Both apps run locally. Admin dashboard loads. Starter storefront shows demo products. |
+| 1. Backend config | Section 11 checklist. Supabase Data API lockdown (section 5). `app` schema created with migrations. | Product image upload lands in Supabase Storage. Test-mode Stripe payment succeeds end to end. A test email sends via Gmail SMTP. `public` schema not reachable via Supabase anon key. |
+| 2. Core flows + tests | Guest checkout, registered checkout, account pages, password reset flow, order emails. Write the Playwright end-to-end suite. | Playwright suite green for: browse → product → add to basket → guest checkout with Stripe test card; register → log in → checkout → order in history; password reset end to end; order confirmation email received. |
+| 3. Custom features | Measurements widget + product page table, sold state, curation, journal (admin editor + storefront), enquiry form, inbox (inbound + replies with images). | Ben can do every admin task in section 7.3 from the Medusa admin alone. Playwright tests added for enquiry form and journal pages. Full suite green. |
+| 4. UI overhaul | Apply the aesthetic using `docs/UI_OVERHAUL_SKILL.md`. | Human sign-off on look. Full Playwright suite green. No edits in locked paths (section 9). Accessibility: WCAG AA contrast, keyboard focus visible, responsive to mobile. |
+| 5. Launch prep | Real content from Ben, static pages, SEO basics (sitemap already in starter, metadata, product structured data), favicon, 404. Close hosting, Cloudflare and email open threads. Deploy. Switch Stripe to live keys. | Live site on Ben's domain. Real test purchase refunded successfully. |
+| 6. Sync engine | Decide Vinted extent. eBay sync. Variant-to-listing mapping. Oversell handling. | Item sold on site is delisted on eBay automatically (and Vinted per decision). Item sold on eBay is marked sold on site. |
+
+## 13. Open threads (do not build)
+
+| Thread | Current state | Decide when |
+|---|---|---|
+| Resend (or other paid email) | v1 uses Gmail SMTP. Resend is a possible upgrade if deliverability or volume becomes a problem. | When needed |
+| Ben's bundled hosting service | Unknown provider and plan. Probably shared PHP hosting. A mailbox on Ben's domain could replace the Gmail address for sending. | Before Phase 5 |
+| Production hosting locations and services | Railway assumed (three services, hard spending limit). Not confirmed. | Before Phase 5 |
+| Cloudflare in front of the site | Proposed: free plan, DNS + proxy, SSL mode Full, keep Bot Fight Mode off or test Stripe webhooks with it on, verify MX/TXT records before switching nameservers. Not confirmed. | Before Phase 5 |
+| Vinted sync extent | See 7.9 | Start of Phase 6 |
+
+## 14. Content inputs needed from Ben (not architecture, but blocking specific phases)
+
+- Store name and logo (placeholder `<STORE_NAME>` until then)
+- Official Gmail address for the shop
+- Shipping zones and rates; whether to sell internationally
+- VAT registration status
+- Returns policy
+- Final list of measurement fields and condition grades
+- Section name for the blog ("Journal" is a placeholder)
+- Whether sold items appear anywhere other than their own URL
+- About page text and the first journal posts
+
+## 15. Decision log
+
+| Decision | Reason |
+|---|---|
+| Medusa v2 instead of WordPress/WooCommerce | Ready-made shop logic without PHP; API-first design suits the sync engine and AI-assisted development; storefront fully customisable. |
+| Supabase as Medusa's Postgres, plus storage and `app` schema | Medusa needs Postgres and has none of its own; Oscar already knows Supabase; free tier. |
+| Medusa owns identity; no Supabase Auth | Avoids two login systems for the same people. |
+| Inbox, journal and curation inside Medusa admin | One login and one dashboard for Ben. |
+| Gmail SMTP instead of Resend for v1 | Free; adequate at this shop's volume. |
+| Full customer accounts plus guest checkout | Requested. Requires password-reset email from day one. |
+| Sync engine last, in Medusa scheduled jobs (TypeScript) | Keeps stock changes inside Medusa; one less service to host. Vinted extent deferred. |
+| Vercel Hobby excluded | Its terms forbid commercial use. |
+| No AI-generated product photography | Second-hand goods must be shown as they are. |

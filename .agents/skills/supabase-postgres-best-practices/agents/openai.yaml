@@ -1,0 +1,4 @@
+interface:
+  display_name: "Postgres Best Practices"
+  short_description: "Postgres schema, RLS, indexes, migrations and performance"
+  default_prompt: "Use $supabase-postgres-best-practices to write or review this SQL."

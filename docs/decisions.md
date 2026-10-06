@@ -447,6 +447,10 @@ real Supabase project or other live service**. Oscar applies migrations, deploys
 runs SQL himself (for example in the Supabase SQL editor). An agent's job ends at the reviewed file
 plus clear instructions for running it. The exact command deny-list is set in Phase 5, when a
 deployable backend exists.
+*Amended 2026-10-06:* a first deny-list is in place now, not at Phase 5: `medusa db:*`, `exec` and
+`user`, and `supabase db push|reset|query|pull`, `migration repair` and `functions deploy`, with and
+without `npx`, in `.claude/settings.json`, `opencode.json` and `.codex/rules/project.rules`. Phase 5
+extends it for deployment.
 
 ## LOCKED — Where this repository's records live (2026-10-03)
 
@@ -567,3 +571,17 @@ Agents write and check; Oscar runs anything that touches a database or deploys. 
   (tables, policies, advisors) and in the running app.
 - **Agents never** run `db push`, `db:migrate`, `medusa exec`, write over the MCP, deploy anything,
   or push to GitHub.
+- *Amended 2026-10-06:* agents create new migration files with `npx supabase migration new <name>`
+  (it only writes a local file). The `supabase` agent skill's "Option B" (change the schema with
+  `execute_sql` or `supabase db query`, then capture it with `supabase db pull`) assumes a local
+  Docker database and does not apply here; there is no local Supabase stack.
+
+## LOCKED — Supabase agent skills (2026-10-06)
+
+Oscar installed `supabase` and `supabase-postgres-best-practices` from `supabase/agent-skills` with
+`npx skills add` (tracked in `skills-lock.json`; MIT licence, by Supabase). To pass
+`tools/check-agent-setup` they are mirrored into `.claude/skills`, their frontmatter is trimmed to
+`name` and `description`, and each has our own `agents/openai.yaml`. Because of the trimmed
+frontmatter, the hashes in `skills-lock.json` no longer match; an `npx skills` update overwrites the
+`.agents` copy only and must be re-trimmed and re-mirrored. Where these skills conflict with "Database
+and deployment workflow", the ledger wins.

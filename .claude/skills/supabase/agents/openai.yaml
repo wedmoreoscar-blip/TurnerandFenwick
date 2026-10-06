@@ -1,0 +1,4 @@
+interface:
+  display_name: "Supabase"
+  short_description: "Supabase products, CLI, MCP, auth, RLS and debugging"
+  default_prompt: "Use $supabase for this Supabase task."

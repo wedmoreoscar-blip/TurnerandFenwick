@@ -20,7 +20,25 @@
       "*": "allow",
       "git push": "deny",
       "git push *": "deny",
-      "git -C * push *": "deny"
+      "git -C * push *": "deny",
+      "npx medusa db:*": "deny",
+      "medusa db:*": "deny",
+      "npx medusa exec *": "deny",
+      "medusa exec *": "deny",
+      "npx medusa user *": "deny",
+      "medusa user *": "deny",
+      "npx supabase db push*": "deny",
+      "supabase db push*": "deny",
+      "npx supabase db reset*": "deny",
+      "supabase db reset*": "deny",
+      "npx supabase migration repair*": "deny",
+      "supabase migration repair*": "deny",
+      "npx supabase functions deploy*": "deny",
+      "supabase functions deploy*": "deny",
+      "npx supabase db query*": "deny",
+      "supabase db query*": "deny",
+      "npx supabase db pull*": "deny",
+      "supabase db pull*": "deny"
     }
   },
   "mcp": {

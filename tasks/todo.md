@@ -45,6 +45,11 @@ Scope: the Medusa configuration checklist (`docs/decisions.md`, "Medusa configur
 Data API lockdown. `app` schema created with migrations. Agents write the migrations and SQL; Oscar
 applies them.
 
+Note: the `dev` project has Supabase's auto-enable RLS event trigger (`ensure_rls`), so every table
+created in `public`, Medusa's included, gets RLS switched on with no policies. Medusa connects as the
+table owner, so it should be unaffected; confirm this after the scaffold and when designing the
+lockdown.
+
 Acceptance:
 
 - [ ] A product image upload lands in Supabase Storage.

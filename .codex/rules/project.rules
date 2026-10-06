@@ -6,3 +6,202 @@
 #     decision = "forbidden",
 #     justification = "Remote migrations are the user's to run",
 # )
+
+# Database and deploy commands are Oscar's to run (docs/decisions.md, "Database and deployment
+# workflow"). Codex prefixes are literal, so each command is listed with and without npx.
+
+prefix_rule(
+    pattern = ["npx", "medusa", "db:migrate"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa db:migrate"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "db:migrate"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa db:migrate"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "db:generate"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa db:generate"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "db:generate"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa db:generate"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "db:rollback"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa db:rollback"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "db:rollback"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa db:rollback"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "db:sync-links"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa db:sync-links"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "db:sync-links"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa db:sync-links"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "db:setup"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa db:setup"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "db:setup"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa db:setup"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "db:create"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa db:create"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "db:create"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa db:create"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "exec"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa exec"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "exec"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa exec"],
+)
+
+prefix_rule(
+    pattern = ["npx", "medusa", "user"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx medusa user"],
+)
+
+prefix_rule(
+    pattern = ["medusa", "user"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["medusa user"],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "db", "push"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx supabase db push"],
+)
+
+prefix_rule(
+    pattern = ["supabase", "db", "push"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["supabase db push"],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "db", "reset"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx supabase db reset"],
+)
+
+prefix_rule(
+    pattern = ["supabase", "db", "reset"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["supabase db reset"],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "migration", "repair"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx supabase migration repair"],
+)
+
+prefix_rule(
+    pattern = ["supabase", "migration", "repair"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["supabase migration repair"],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "functions", "deploy"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx supabase functions deploy"],
+)
+
+prefix_rule(
+    pattern = ["supabase", "functions", "deploy"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["supabase functions deploy"],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "db", "query"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx supabase db query"],
+)
+
+prefix_rule(
+    pattern = ["supabase", "db", "query"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["supabase db query"],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "db", "pull"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["npx supabase db pull"],
+)
+
+prefix_rule(
+    pattern = ["supabase", "db", "pull"],
+    decision = "forbidden",
+    justification = "Database and deploy commands are Oscar's to run.",
+    match = ["supabase db pull"],
+)

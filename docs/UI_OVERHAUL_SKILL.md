@@ -2,7 +2,7 @@
 
 Status: rough draft. Nothing here is built yet. Last updated 2026-10-03.
 
-Referenced from `docs/PROJECT_PLAN.md` (section 9, Phase 4). Coding agents doing UI work on the storefront follow this document; if the skill described here hasn't been packaged yet, follow the manual process in section 6.
+Referenced from `docs/PROJECT_PLAN.md` (section 9, Phase 4); its settled parts are recorded in `docs/decisions.md` ("UI overhaul" entries). Coding agents doing UI work on the storefront follow this document; if the skill described here hasn't been packaged yet, follow the manual process in section 6.
 
 ## 1. Purpose
 
@@ -47,6 +47,7 @@ The fourth row is the addition this project needs most, because the storefront c
 - Commands most relevant here: `shape` (plan before code), `craft` (shape-then-build with visual iteration), `critique` (UX review), `audit` (accessibility, performance, responsive), `typeset`, `layout`, `colorize`, `quieter`, `distill`, `polish` (final pass), `live` (iterate on elements in the browser).
 - Ships a deterministic detector CLI (`npx impeccable detect <path>`) with dozens of rules that need no LLM or API key. Usable as an automated gate.
 - Writes working files under `.impeccable/`. Add its recommended `.gitignore` block.
+- **Check where the installer puts its skills before relying on it.** This repository keeps no personal or global skills: if `npx impeccable install` writes into `~/.claude/skills` or another home folder, move the skills into the project and mirror them into both `.agents/skills/` and `.claude/skills/`.
 
 Note on naming: Impeccable owns `PRODUCT.md` and `DESIGN.md` at the repo root. The project's own plan is therefore called `PROJECT_PLAN.md` to avoid a collision.
 
@@ -160,6 +161,7 @@ Stripe Payment Element: style it through Stripe's Appearance API (theme variable
 ## 8. Draft skill package
 
 ```
+.agents/skills/ui-overhaul/   byte-identical mirror of .claude/skills/ui-overhaul/ (Codex, opencode)
 .claude/skills/ui-overhaul/
   SKILL.md                    entry point (draft below)
   references/
@@ -221,7 +223,7 @@ Refero and Higgsfield are optional; leave them out until section 9 says otherwis
 | v0 (manual) | No skill packaging. Install Impeccable and Playwright MCP, follow section 6 by hand on one area (the product page). | One area restyled, suite green, result approved |
 | v1 (skill) | Package sections 5 to 7 as the `ui-overhaul` skill with the boundary script. Run it on the remaining areas. | Whole storefront done in Phase 4 |
 | v2 (paid add-ons) | Add Refero and/or Higgsfield only if v0/v1 output still looks generic or mockups need imagery. | Clear quality gap that references or imagery would fix |
-| v3 (reuse) | Move the skill to `~/.claude/skills/` for use across projects; keep `design/boundaries.json` per project. | A second project needs it |
+| v3 (reuse) | Add the skill to the agent kit as a `ui-overhaul` pack (`kit push --new .agents/skills/ui-overhaul --pack ui-overhaul`), with any MCP servers it needs as the pack's `mcp.toml`; other projects then get it with `kit add ui-overhaul`. Never copy it into `~/.claude/skills` or another home folder. Keep `design/boundaries.json` per project. | A second project needs it |
 
 ## 10. Costs
 

@@ -1,5 +1,10 @@
 # PROJECT_PLAN.md: Menswear storefront for Ben Turner
 
+> **Starter brief, kept for background.** On 2026-10-03 every LOCKED section, OPEN thread and logged
+> decision below was ported into `docs/decisions.md`, and the build phases into `tasks/todo.md`.
+> Those files are now where decisions live and change; where this brief disagrees with them, they
+> win. Agents start from `AGENTS.md`.
+
 Status: planning complete, build not started. Last updated 2026-10-03.
 
 ## 0. Read this first (instructions for coding agents)
@@ -20,7 +25,7 @@ Suggested repo layout:
 /storefront     Next.js storefront (Medusa's official starter, restyled)
 /docs           PROJECT_PLAN.md, UI_OVERHAUL_SKILL.md
 /design         references, mockups, direction notes (created by the UI overhaul process)
-CLAUDE.md       short pointer: "Read docs/PROJECT_PLAN.md before any task."
+AGENTS.md       agent entry point (CLAUDE.md imports it); points agents at docs/decisions.md
 ```
 
 Paths below are prefixed `backend/` or `storefront/` because both projects have a `src/modules` folder and they mean different things.

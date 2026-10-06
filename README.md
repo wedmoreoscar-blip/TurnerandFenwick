@@ -4,7 +4,7 @@ Online shop for Ben Turner's menswear: suits and quality tailoring, sold as one-
 
 Status: planning done, build not started.
 
-Full plan: [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md). UI approach: [`docs/UI_OVERHAUL_SKILL.md`](docs/UI_OVERHAUL_SKILL.md). Coding agents should read the project plan before any task.
+Decisions: [`docs/decisions.md`](docs/decisions.md). Build phases: [`tasks/todo.md`](tasks/todo.md). Original brief: [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md). UI approach: [`docs/UI_OVERHAUL_SKILL.md`](docs/UI_OVERHAUL_SKILL.md). Coding agents start from [`AGENTS.md`](AGENTS.md).
 
 ## Stack
 

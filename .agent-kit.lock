@@ -3,7 +3,8 @@
   "kit_commit": "ee6cb68",
   "packs": [
     "core",
-    "traycer"
+    "traycer",
+    "mcp-playwright"
   ],
   "targets": [
     "agents",
@@ -582,6 +583,14 @@
       "path": ".claude/skills/writespec/blocks/scope.md",
       "hash": "5f27e6852ab17402"
     },
+    ".codex/config.toml#mcp-playwright": {
+      "kind": "region",
+      "pack": "mcp-playwright",
+      "path": ".codex/config.toml",
+      "hash": "84a8b355b8a3896d",
+      "name": "mcp-playwright",
+      "style": "hash"
+    },
     ".codex/config.toml#traycer-settings": {
       "kind": "region",
       "pack": "traycer",
@@ -603,6 +612,23 @@
       "hash": "30fb76faa2d8bb23",
       "name": "core",
       "style": "hash"
+    },
+    ".mcp.json#mcpServers/playwright=playwright": {
+      "kind": "json",
+      "pack": "mcp-playwright",
+      "path": ".mcp.json",
+      "hash": "465180c47bb05a55",
+      "keys": [
+        "mcpServers",
+        "playwright"
+      ],
+      "value": {
+        "command": "npx",
+        "args": [
+          "@playwright/mcp@latest"
+        ]
+      },
+      "mode": "key"
     },
     "AGENTS.md#core": {
       "kind": "region",
@@ -715,6 +741,25 @@
       "pack": "core",
       "path": "docs/workflows/visual_check.md",
       "hash": "b22efa5293e96962"
+    },
+    "opencode.json#mcp/playwright=playwright": {
+      "kind": "json",
+      "pack": "mcp-playwright",
+      "path": "opencode.json",
+      "hash": "1a40be253a0dd199",
+      "keys": [
+        "mcp",
+        "playwright"
+      ],
+      "value": {
+        "type": "local",
+        "command": [
+          "npx",
+          "@playwright/mcp@latest"
+        ],
+        "enabled": true
+      },
+      "mode": "key"
     },
     "opencode.json#permission/bash/git -C * push *=git -C * push *": {
       "kind": "json",

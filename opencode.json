@@ -22,5 +22,15 @@
       "git push *": "deny",
       "git -C * push *": "deny"
     }
+  },
+  "mcp": {
+    "playwright": {
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
   }
 }

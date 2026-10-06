@@ -36,14 +36,20 @@ write code that assumes an answer.** If a task depends on one, stop and ask Osca
   at the start of Phase 6.
 - **Stripe's own payment receipts** (§7.7). Decide with Ben whether to enable them, to avoid
   duplicate emails alongside the order confirmation.
-- **Repository layout vs `create-medusa-app`** (new, 2026-10-03). The starter brief suggests
-  top-level `backend/` and `storefront/` (§0), but current `create-medusa-app` scaffolds a monorepo
-  with `apps/backend` and `apps/storefront`. Decide at Phase 0 whether to keep the generated layout or
-  rearrange; every path in this ledger that starts `backend/` or `storefront/` follows that choice.
-- **Medusa documentation route for agents** (new, 2026-10-03). The starter brief names Medusa's docs
-  MCP server (`https://docs.medusajs.com/mcp`), which needs a Medusa Cloud account (OAuth or a
-  personal access key). Alternatives: `https://docs.medusajs.com/llms.txt` (no account) and
-  Medusa's agent skills (`medusajs/medusa-agent-skills`). Decide before Phase 0.
+- ~~Repository layout vs `create-medusa-app`~~ — closed 2026-10-06, see "Repository layout".
+- ~~Medusa documentation route for agents~~ — closed 2026-10-06, see "How agents read Medusa's
+  docs".
+- ~~Who runs Medusa migrations against Supabase `dev`~~ — closed 2026-10-06, see "Oscar runs Medusa
+  migrations, including against `dev`".
+- **How hand-written SQL reaches Supabase** (new, 2026-10-06). The `dev` project is connected to the
+  GitHub repository through Supabase's GitHub integration. With its "Deploy to production" toggle on,
+  a push to `main` applies new files in `supabase/migrations/` (plus Edge Functions and storage buckets
+  declared in `supabase/config.toml`) to the connected project. Medusa's own migrations are not
+  covered either way: they are TypeScript files run by `npx medusa db:migrate`. Choose one route for
+  hand-written SQL, never both, because SQL run in the editor is not recorded as an applied migration:
+  (a) SQL editor only, with the integration's deploy toggle off; or (b) migration files pushed to
+  GitHub, with no schema changes in the editor. Also settle which project the integration points at
+  once `prod` exists. Decide before the first hand-written migration (Phase 1).
 - **Waiting on Ben** (§14), blocking specific phases, not architecture: store name and logo
   (placeholder `<STORE_NAME>`); the official Gmail address; shipping zones and rates and whether to
   sell internationally; VAT registration status; returns policy; the final measurement fields and
@@ -434,7 +440,7 @@ From §11.
 ## LOCKED — Medusa APIs are checked against current docs, never recalled (2026-10-03)
 
 From §0. Medusa v2 changes often. Check current documentation for Medusa APIs and config syntax
-rather than relying on memory. How agents reach the docs is PENDING above.
+rather than relying on memory. How agents reach the docs: "How agents read Medusa's docs" (2026-10-06).
 
 ## LOCKED — Build in phase order (2026-10-03)
 
@@ -472,3 +478,55 @@ From §15.
 | Sync engine last, in Medusa scheduled jobs (TypeScript) | Keeps stock changes inside Medusa; one less service to host. Vinted extent deferred. |
 | Vercel Hobby excluded | Its terms forbid commercial use. Medusa also cannot run on Supabase, Vercel serverless or typical shared hosting. |
 | No AI-generated product photography | Second-hand goods must be shown as they are. |
+
+## LOCKED — Repository layout: `apps/backend` and `apps/storefront` (2026-10-06)
+
+Keep the monorepo layout `create-medusa-app` generates, moved up into this repository's root:
+`apps/backend/` (Medusa server and admin) and `apps/storefront/` (Next.js starter). This matches
+Medusa's docs, agent skills and upgrade guides. Every path in this ledger written `backend/…` or
+`storefront/…` means `apps/backend/…` or `apps/storefront/…`.
+
+## LOCKED — How agents read Medusa's docs (2026-10-06)
+
+- **Medusa's official agent skills**, from `medusajs/medusa-agent-skills`: the `medusa-dev` plugin's
+  skills plus `storefront-best-practices`. They are installed into this project only, mirrored into
+  both skill folders, and never installed globally or as a Claude Code plugin. The `medusa-cloud`
+  skills are excluded, and so is `db-migrate`, because Oscar runs migrations.
+- **Medusa's public docs as plain text**: `https://docs.medusajs.com/llms.txt` (an index of every docs
+  page, served live from the docs site), and any page's markdown by appending `.md` to its URL.
+  `https://docs.medusajs.com/llms-full.txt` (about 7 MB) is the whole site, too large for routine use.
+- **No docs MCP server.** `https://docs.medusajs.com/mcp` requires authentication (it returns 401
+  without it) and Oscar does not want a Medusa Cloud account. Where the skills say to query the
+  "MedusaDocs MCP server", agents fetch the matching docs page through `llms.txt` instead.
+
+## LOCKED — MCP servers for this repository (2026-10-06)
+
+- Playwright MCP through the kit (`kit add mcp-playwright`).
+- No Context7. Medusa's own docs and skills are better sources.
+- Supabase MCP once the `dev` project exists: read-only and scoped to `dev`. It is a remote server
+  that needs an OAuth login through `/mcp`; Playwright runs locally and needs no login. Agents use it
+  to read the schema, RLS policies and the security and performance advisors, then write any fix as a
+  migration or SQL for Oscar to run.
+
+## LOCKED — Row-level security ships in the migration that creates the table (2026-10-06)
+
+Agents write the RLS enablement and policies for each `app`-schema table in the same migration that
+creates the table. They check the SQL before handing it over, and Oscar reads, verifies and runs it
+in the SQL editor. This doesn't change "Oscar runs anything that changes a live service".
+
+## LOCKED — Phase 0 scaffold settings (2026-10-06)
+
+- Oscar runs `create-medusa-app` himself, with the Next.js starter, npm, and `--db-url` set to the
+  Supabase `dev` session-pooler URL (port 5432). No `--skip-db`. The `dev` project is created first,
+  after the dev/prod and migration questions are settled.
+- With `--db-url`, the command itself runs Medusa's migrations, creates the admin user and seeds demo
+  data against `dev`.
+- Package manager: npm.
+
+## LOCKED — Oscar runs Medusa migrations, including against `dev` (2026-10-06)
+
+Agents write Medusa data models and generate migration files, but never run `npx medusa db:migrate`
+against any database, `dev` included. Oscar runs it. Medusa needs migrations only when a custom data
+model or module link changes or Medusa is upgraded: a handful a day at most in Phase 3, so the
+DrinkSmart habit holds. The initial migrations, admin user and seed come from `create-medusa-app`,
+which Oscar runs. The `prod` Supabase project is created at Phase 5, not before.

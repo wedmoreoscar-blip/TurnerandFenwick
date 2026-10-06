@@ -12,3 +12,9 @@ enabled = true
 [sandbox_workspace_write]
 network_access = true
 # kit:end traycer-settings
+
+# kit:begin mcp-playwright
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+# kit:end mcp-playwright

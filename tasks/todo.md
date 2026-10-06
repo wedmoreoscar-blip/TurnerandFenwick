@@ -9,10 +9,25 @@ Status: planning done, Phase 0 not started.
 
 ## Phase 0 — Scaffold
 
-Scope: create the Medusa backend and the Next.js starter storefront (`create-medusa-app` offers the
-storefront). Settle the repository layout (PENDING: `apps/backend` + `apps/storefront` as generated,
-or top-level `backend/` + `storefront/`). Create the Supabase `dev` project (Oscar). Settle how agents
-reach Medusa's docs (PENDING).
+Scope: create the Medusa backend and the Next.js starter storefront in `apps/backend` and
+`apps/storefront` at this repository's root (`docs/decisions.md`, "Repository layout" and "Phase 0
+scaffold settings").
+
+Steps, in order:
+
+1. [x] Repository layout and docs route settled (2026-10-06).
+2. [x] Playwright MCP added through the kit (2026-10-06).
+3. [x] Oscar runs Medusa migrations, `dev` included (2026-10-06).
+4. [ ] Install Medusa's agent skills into both skill folders (`medusa-dev` skills except
+   `db-migrate`, plus `storefront-best-practices`). Add a note that "MedusaDocs
+   MCP" means `llms.txt` and per-page `.md`.
+5. [x] Oscar created the Supabase `dev` project and connected it to the GitHub repository
+   (2026-10-06). [ ] Stripe CLI.
+6. [ ] Oscar runs `npx create-medusa-app@latest` with `--with-nextjs-starter --use-npm --db-url <dev
+   session pooler>`. Move the generated contents into the repository root, keeping `apps/…`.
+7. [ ] Supabase MCP added, read-only and scoped to `dev`.
+8. [ ] Settle how hand-written SQL reaches Supabase (PENDING: SQL editor vs GitHub integration),
+   before Phase 1's first migration.
 
 Then finish the agent setup: fill in `AGENTS.md` (Purpose, Project invariants) and
 `docs/project_profile.md`, including its `[commands]` block, from the scaffolded apps' real scripts,

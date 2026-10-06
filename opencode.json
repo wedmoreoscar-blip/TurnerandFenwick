@@ -27,7 +27,8 @@
     "playwright": {
       "command": [
         "npx",
-        "@playwright/mcp@latest"
+        "@playwright/mcp@latest",
+        "--headless"
       ],
       "enabled": true,
       "type": "local"

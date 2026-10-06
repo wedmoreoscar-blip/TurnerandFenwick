@@ -16,5 +16,5 @@ network_access = true
 # kit:begin mcp-playwright
 [mcp_servers.playwright]
 command = "npx"
-args = ["@playwright/mcp@latest"]
+args = ["@playwright/mcp@latest", "--headless"]
 # kit:end mcp-playwright

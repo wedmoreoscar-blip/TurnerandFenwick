@@ -1,6 +1,6 @@
 {
   "_comment": "Written by `kit` from the agent kit. Records what the kit installed so kit and local edits can be told apart. Do not edit by hand.",
-  "kit_commit": "ee6cb68",
+  "kit_commit": "fd94755",
   "packs": [
     "core",
     "traycer",
@@ -587,7 +587,7 @@
       "kind": "region",
       "pack": "mcp-playwright",
       "path": ".codex/config.toml",
-      "hash": "84a8b355b8a3896d",
+      "hash": "6e25de7bae265861",
       "name": "mcp-playwright",
       "style": "hash"
     },
@@ -617,7 +617,7 @@
       "kind": "json",
       "pack": "mcp-playwright",
       "path": ".mcp.json",
-      "hash": "465180c47bb05a55",
+      "hash": "bd88249bf442f407",
       "keys": [
         "mcpServers",
         "playwright"
@@ -625,7 +625,8 @@
       "value": {
         "command": "npx",
         "args": [
-          "@playwright/mcp@latest"
+          "@playwright/mcp@latest",
+          "--headless"
         ]
       },
       "mode": "key"
@@ -746,7 +747,7 @@
       "kind": "json",
       "pack": "mcp-playwright",
       "path": "opencode.json",
-      "hash": "1a40be253a0dd199",
+      "hash": "f27bd0df83c2c979",
       "keys": [
         "mcp",
         "playwright"
@@ -755,7 +756,8 @@
         "type": "local",
         "command": [
           "npx",
-          "@playwright/mcp@latest"
+          "@playwright/mcp@latest",
+          "--headless"
         ],
         "enabled": true
       },

@@ -41,15 +41,8 @@ write code that assumes an answer.** If a task depends on one, stop and ask Osca
   docs".
 - ~~Who runs Medusa migrations against Supabase `dev`~~ — closed 2026-10-06, see "Oscar runs Medusa
   migrations, including against `dev`".
-- **How hand-written SQL reaches Supabase** (new, 2026-10-06). The `dev` project is connected to the
-  GitHub repository through Supabase's GitHub integration. With its "Deploy to production" toggle on,
-  a push to `main` applies new files in `supabase/migrations/` (plus Edge Functions and storage buckets
-  declared in `supabase/config.toml`) to the connected project. Medusa's own migrations are not
-  covered either way: they are TypeScript files run by `npx medusa db:migrate`. Choose one route for
-  hand-written SQL, never both, because SQL run in the editor is not recorded as an applied migration:
-  (a) SQL editor only, with the integration's deploy toggle off; or (b) migration files pushed to
-  GitHub, with no schema changes in the editor. Also settle which project the integration points at
-  once `prod` exists. Decide before the first hand-written migration (Phase 1).
+- ~~How hand-written SQL reaches Supabase~~ — closed 2026-10-06, see "Hand-written SQL goes through
+  the SQL editor only".
 - **Waiting on Ben** (§14), blocking specific phases, not architecture: store name and logo
   (placeholder `<STORE_NAME>`); the official Gmail address; shipping zones and rates and whether to
   sell internationally; VAT registration status; returns policy; the final measurement fields and
@@ -530,3 +523,10 @@ against any database, `dev` included. Oscar runs it. Medusa needs migrations onl
 model or module link changes or Medusa is upgraded: a handful a day at most in Phase 3, so the
 DrinkSmart habit holds. The initial migrations, admin user and seed come from `create-medusa-app`,
 which Oscar runs. The `prod` Supabase project is created at Phase 5, not before.
+
+## LOCKED — Hand-written SQL goes through the SQL editor only (2026-10-06)
+
+No Supabase GitHub integration: Oscar disconnects it from the `dev` project, and it is not connected
+to `prod` either. Agents write hand-written SQL (the `app` schema, RLS, the Data API lockdown) as
+reviewed files, and Oscar runs them in the SQL editor, as on DrinkSmart. A git push never changes a
+database.

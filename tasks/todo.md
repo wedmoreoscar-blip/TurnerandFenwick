@@ -22,12 +22,11 @@ Steps, in order:
    `db-migrate`, plus `storefront-best-practices`). Add a note that "MedusaDocs
    MCP" means `llms.txt` and per-page `.md`.
 5. [x] Oscar created the Supabase `dev` project and connected it to the GitHub repository
-   (2026-10-06). [ ] Stripe CLI.
+   (2026-10-06); Oscar disconnects that integration. [ ] Stripe CLI.
 6. [ ] Oscar runs `npx create-medusa-app@latest` with `--with-nextjs-starter --use-npm --db-url <dev
    session pooler>`. Move the generated contents into the repository root, keeping `apps/…`.
 7. [ ] Supabase MCP added, read-only and scoped to `dev`.
-8. [ ] Settle how hand-written SQL reaches Supabase (PENDING: SQL editor vs GitHub integration),
-   before Phase 1's first migration.
+8. [x] Hand-written SQL goes through the SQL editor only (2026-10-06).
 
 Then finish the agent setup: fill in `AGENTS.md` (Purpose, Project invariants) and
 `docs/project_profile.md`, including its `[commands]` block, from the scaffolded apps' real scripts,

@@ -18,15 +18,15 @@ Steps, in order:
 1. [x] Repository layout and docs route settled (2026-10-06).
 2. [x] Playwright MCP added through the kit (2026-10-06).
 3. [x] Oscar runs Medusa migrations, `dev` included (2026-10-06).
-4. [ ] Install Medusa's agent skills into both skill folders (`medusa-dev` skills except
-   `db-migrate`, plus `storefront-best-practices`). Add a note that "MedusaDocs
-   MCP" means `llms.txt` and per-page `.md`.
-5. [x] Oscar created the Supabase `dev` project and connected it to the GitHub repository
-   (2026-10-06); Oscar disconnects that integration. [ ] Stripe CLI.
+4. [x] Medusa agent skills installed in both skill folders (2026-10-06; see `docs/decisions.md`).
+5. [x] Supabase `dev` project created, GitHub integration disconnected, Supabase CLI installed as a
+   root dev dependency and linked (2026-10-06). [ ] Oscar installs the Stripe CLI.
 6. [ ] Oscar runs `npx create-medusa-app@latest` with `--with-nextjs-starter --use-npm --db-url <dev
-   session pooler>`. Move the generated contents into the repository root, keeping `apps/…`.
-7. [ ] Supabase MCP added, read-only and scoped to `dev`.
-8. [x] Hand-written SQL goes through the SQL editor only (2026-10-06).
+   session pooler>`. Move the generated contents into the repository root, keeping `apps/…`, and
+   merge the existing root `package.json` (the `supabase` dev dependency) into the generated one.
+7. [x] Supabase MCP (read-only, `dev`) and Playwright MCP verified working (2026-10-06).
+8. [x] Schema SQL goes through `npx supabase db push` (2026-10-06, "Database and deployment
+   workflow").
 
 Then finish the agent setup: fill in `AGENTS.md` (Purpose, Project invariants) and
 `docs/project_profile.md`, including its `[commands]` block, from the scaffolded apps' real scripts,

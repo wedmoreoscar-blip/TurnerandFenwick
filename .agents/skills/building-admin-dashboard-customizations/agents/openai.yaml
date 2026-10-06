@@ -1,0 +1,4 @@
+interface:
+  display_name: "Medusa Admin UI"
+  short_description: "Medusa admin widgets, pages, forms and tables"
+  default_prompt: "Use $building-admin-dashboard-customizations to build a Medusa admin widget or page."

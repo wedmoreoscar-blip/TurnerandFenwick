@@ -1,0 +1,4 @@
+interface:
+  display_name: "Medusa Backend"
+  short_description: "Medusa modules, workflows, API routes and links"
+  default_prompt: "Use $building-with-medusa to plan or implement a Medusa backend feature."

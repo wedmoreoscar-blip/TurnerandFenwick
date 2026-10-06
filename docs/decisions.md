@@ -485,6 +485,13 @@ Medusa's docs, agent skills and upgrade guides. Every path in this ledger writte
   skills plus `storefront-best-practices`. They are installed into this project only, mirrored into
   both skill folders, and never installed globally or as a Claude Code plugin. The `medusa-cloud`
   skills are excluded, and so is `db-migrate`, because Oscar runs migrations.
+  *Amended 2026-10-06 at install:* installed `building-with-medusa`,
+  `building-admin-dashboard-customizations`, `building-storefronts` and `storefront-best-practices`,
+  byte-identical to upstream commit `066132d` (2026-10-05) plus our own `agents/openai.yaml`. Also
+  excluded: `db-generate` (it connects to the database), `new-user` (it writes an admin user) and
+  `creating-internal-agents` (in-admin AI agents are out of scope). Where these skills say to run
+  `npx medusa db:generate` or `db:migrate` ("never skip"), agents stop and hand the command to Oscar
+  instead; this ledger outranks the skills.
 - **Medusa's public docs as plain text**: `https://docs.medusajs.com/llms.txt` (an index of every docs
   page, served live from the docs site), and any page's markdown by appending `.md` to its URL.
   `https://docs.medusajs.com/llms-full.txt` (about 7 MB) is the whole site, too large for routine use.
@@ -518,8 +525,10 @@ in the SQL editor. This doesn't change "Oscar runs anything that changes a live 
 
 ## LOCKED — Oscar runs Medusa migrations, including against `dev` (2026-10-06)
 
-Agents write Medusa data models and generate migration files, but never run `npx medusa db:migrate`
-against any database, `dev` included. Oscar runs it. Medusa needs migrations only when a custom data
+Agents write Medusa data models, but never run `npx medusa db:migrate` against any database, `dev`
+included. Oscar runs it. *Amended 2026-10-06:* `npx medusa db:generate` also connects to the database
+(it checks the database exists and creates Medusa's migrations table if missing), so Oscar runs that
+too; agents then review the generated migration file before he runs `db:migrate`. Medusa needs migrations only when a custom data
 model or module link changes or Medusa is upgraded: a handful a day at most in Phase 3, so the
 DrinkSmart habit holds. The initial migrations, admin user and seed come from `create-medusa-app`,
 which Oscar runs. The `prod` Supabase project is created at Phase 5, not before.
@@ -547,8 +556,8 @@ Agents write and check; Oscar runs anything that touches a database or deploys. 
   integration is disconnected (Oscar, 2026-10-06), so a git push never changes a database.
 - **SQL editor**: only for small one-off data changes (for example, promoting a user to admin) and
   read-only queries. Never schema changes, which would put `db push`'s record out of step.
-- **Medusa migrations**: agents write the data model and generate the migration file; Oscar runs
-  `npx medusa db:migrate` (see "Oscar runs Medusa migrations, including against `dev`"). The same
+- **Medusa migrations**: agents write the data model; Oscar runs `npx medusa db:generate <module>`,
+  agents review the generated file, then Oscar runs `npx medusa db:migrate` (see "Oscar runs Medusa migrations, including against `dev`"). The same
   applies to module links, Medusa upgrades and `npx medusa exec` scripts that write data.
 - **Edge Functions** (probably none in v1): agents write them in `supabase/functions/<name>/`; Oscar
   deploys them with `npx supabase functions deploy <name>`.

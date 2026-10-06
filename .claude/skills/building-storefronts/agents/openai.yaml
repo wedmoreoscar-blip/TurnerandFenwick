@@ -1,0 +1,4 @@
+interface:
+  display_name: "Medusa Storefront SDK"
+  short_description: "Call Medusa APIs from the storefront with the JS SDK"
+  default_prompt: "Use $building-storefronts to connect a storefront feature to Medusa."

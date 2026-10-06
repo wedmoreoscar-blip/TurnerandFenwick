@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storefront Best Practices"
+  short_description: "Ecommerce storefront pages, cart and checkout patterns"
+  default_prompt: "Use $storefront-best-practices to design or build a storefront page or component."

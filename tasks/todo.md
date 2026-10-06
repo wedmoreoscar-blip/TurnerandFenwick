@@ -21,7 +21,7 @@ Steps, in order:
 4. [x] Medusa agent skills installed in both skill folders (2026-10-06; see `docs/decisions.md`).
 5. [x] Supabase `dev` project created, GitHub integration disconnected, Supabase CLI installed as a
    root dev dependency and linked (2026-10-06). [ ] Oscar installs the Stripe CLI.
-6. [ ] Oscar runs `npx create-medusa-app@latest` with `--with-nextjs-starter --use-npm --db-url <dev
+6. [x] (2026-10-06) Oscar runs `npx create-medusa-app@latest` with `--with-nextjs-starter --use-npm --db-url <dev
    session pooler>`. Move the generated contents into the repository root, keeping `apps/…`, and
    merge the existing root `package.json` (the `supabase` dev dependency) into the generated one.
 7. [x] Supabase MCP (read-only, `dev`) and Playwright MCP verified working (2026-10-06).
@@ -30,14 +30,18 @@ Steps, in order:
 
 Then finish the agent setup: fill in `AGENTS.md` (Purpose, Project invariants) and
 `docs/project_profile.md`, including its `[commands]` block, from the scaffolded apps' real scripts,
-verified by running each one. Run `tools/check-agent-setup`.
+verified by running each one. Run `tools/check-agent-setup`. *Done 2026-10-06:* `AGENTS.md` and the
+profile are filled in, and `tools/check-agent-setup` passes.
 
 Acceptance:
 
-- [ ] Both apps run locally.
-- [ ] The admin dashboard loads.
-- [ ] The starter storefront shows demo products.
-- [ ] `docs/project_profile.md` commands are real and `tools/test-project quick` runs them.
+- [ ] Both apps run locally. Passed in the scaffold folder on 2026-10-06; fails since the move into
+  the repository root (backend never listens on :9000). Fix next session.
+- [ ] The admin dashboard loads. Passed before the move; re-check after the fix.
+- [ ] The starter storefront shows demo products. Passed before the move (4 products on `/dk/store`);
+  re-check after the fix.
+- [x] `docs/project_profile.md` commands are real and `tools/test-project quick` runs them
+  (`build` profile: typecheck, lint, test, build all PASS, 2026-10-06).
 
 ## Phase 1 — Backend configuration
 

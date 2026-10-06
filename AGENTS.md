@@ -2,13 +2,39 @@
 
 ## Purpose
 
-<!-- One paragraph: what this project is, its stack, and the one or two things an agent must never
-get wrong. Facts that change (commands, counts, quirks) go in docs/project_profile.md instead. -->
+An online shop for Ben Turner's one-off second-hand menswear (suits and tailoring). It's an npm and
+Turborepo monorepo: a Medusa v2 backend with its admin dashboard in `apps/backend`, and Medusa's
+Next.js starter storefront in `apps/storefront`. Supabase provides Postgres and Storage, Stripe takes
+payments, and Gmail SMTP sends email. Read `docs/decisions.md` before any design choice; `LOCKED`
+entries are settled, and `PENDING` ones must not be built. The two things never to get wrong: **never
+run anything that changes a database or deploys** (Oscar runs them), and **never write to Medusa's
+tables except through Medusa**.
 
 ## Project invariants
 
-<!-- Rules specific to this codebase: sources of truth, layers that must not be bypassed, things
-not to refactor, dependencies not to add without approval. -->
+- **Sources of truth:** `docs/decisions.md` for decisions, `tasks/todo.md` for the phase plan (build
+  in phase order), and `docs/project_profile.md` for commands and quirks.
+- **Database and deploys** ("Database and deployment workflow"): agents write Medusa data models,
+  `supabase/migrations/` files (created with `npx supabase migration new`) and Edge Functions, then
+  hand over the exact command. Oscar runs `npx medusa db:generate`, `db:migrate`, `medusa exec`,
+  `medusa user`, `npx supabase db push` and every deploy. These are denied in agent permissions;
+  never work around a denial. The Supabase MCP is read-only: use it to inspect, never to change.
+- **Medusa owns its tables** ("Data and identity rules"): all product, stock, order and customer
+  changes go through Medusa's APIs, workflows or module services, never raw SQL, Supabase clients
+  or Edge Functions. Our own data lives in the `app` schema, with RLS on every table, created in the
+  same migration as the table. Medusa owns identity: no Supabase Auth. The service-role key never
+  reaches the storefront or any `NEXT_PUBLIC_*` variable.
+- **The storefront talks only to Medusa,** through `@medusajs/js-sdk` and the Store API, custom
+  content included. It holds no Supabase keys.
+- **Check Medusa against current docs, never memory:** use the Medusa skills, `llms.txt` and the
+  per-page `.md` docs. Where a skill says to run a database command, stop and hand it to Oscar.
+- **UI work** follows `docs/UI_OVERHAUL_SKILL.md` and its behaviour lock ("UI work follows the UI
+  overhaul process"). Never edit `apps/storefront/src/lib/**` (the data layer) or the payment
+  components during UI work.
+- **Product photos are never AI-generated or AI-edited.**
+- **No new service, library or paid dependency without asking.** Prefer what Medusa already
+  provides. Install a dependency inside the app that needs it, never at the root.
+- `docs/medusa_starter/` is reference only. Its database commands and MCP setup don't apply here.
 
 ## Commands
 

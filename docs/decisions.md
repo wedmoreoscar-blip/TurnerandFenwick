@@ -41,8 +41,8 @@ write code that assumes an answer.** If a task depends on one, stop and ask Osca
   docs".
 - ~~Who runs Medusa migrations against Supabase `dev`~~ — closed 2026-10-06, see "Oscar runs Medusa
   migrations, including against `dev`".
-- ~~How hand-written SQL reaches Supabase~~ — closed 2026-10-06, see "Hand-written SQL goes through
-  the SQL editor only".
+- ~~How hand-written SQL reaches Supabase~~ — closed 2026-10-06, see "Database and deployment
+  workflow".
 - **Waiting on Ben** (§14), blocking specific phases, not architecture: store name and logo
   (placeholder `<STORE_NAME>`); the official Gmail address; shipping zones and rates and whether to
   sell internationally; VAT registration status; returns policy; the final measurement fields and
@@ -524,9 +524,37 @@ model or module link changes or Medusa is upgraded: a handful a day at most in P
 DrinkSmart habit holds. The initial migrations, admin user and seed come from `create-medusa-app`,
 which Oscar runs. The `prod` Supabase project is created at Phase 5, not before.
 
-## LOCKED — Hand-written SQL goes through the SQL editor only (2026-10-06)
+## SUPERSEDED — Hand-written SQL goes through the SQL editor only (2026-10-06)
+
+Superseded the same day by "Database and deployment workflow": schema SQL goes through
+`npx supabase db push`. The GitHub integration stays disconnected.
+
 
 No Supabase GitHub integration: Oscar disconnects it from the `dev` project, and it is not connected
 to `prod` either. Agents write hand-written SQL (the `app` schema, RLS, the Data API lockdown) as
 reviewed files, and Oscar runs them in the SQL editor, as on DrinkSmart. A git push never changes a
 database.
+
+## LOCKED — Database and deployment workflow (2026-10-06)
+
+Agents write and check; Oscar runs anything that touches a database or deploys. Always `dev` first;
+`prod` (from Phase 5) gets the same files in the same order.
+
+- **Hand-written SQL** (the `app` schema, RLS, the Data API lockdown, fixes for the security advisor):
+  agents write timestamped files in `supabase/migrations/` and check them against the live schema
+  through the read-only Supabase MCP. Oscar reviews them and applies them with
+  `npx supabase db push`, which records each applied file, so none runs twice. The Supabase GitHub
+  integration is disconnected (Oscar, 2026-10-06), so a git push never changes a database.
+- **SQL editor**: only for small one-off data changes (for example, promoting a user to admin) and
+  read-only queries. Never schema changes, which would put `db push`'s record out of step.
+- **Medusa migrations**: agents write the data model and generate the migration file; Oscar runs
+  `npx medusa db:migrate` (see "Oscar runs Medusa migrations, including against `dev`"). The same
+  applies to module links, Medusa upgrades and `npx medusa exec` scripts that write data.
+- **Edge Functions** (probably none in v1): agents write them in `supabase/functions/<name>/`; Oscar
+  deploys them with `npx supabase functions deploy <name>`.
+- **Medusa and storefront code** touches no database. Agents run and test it locally. Production
+  deploys are designed in Phase 5 with the command deny-list.
+- **Verification**: after Oscar runs something, agents check the result through the Supabase MCP
+  (tables, policies, advisors) and in the running app.
+- **Agents never** run `db push`, `db:migrate`, `medusa exec`, write over the MCP, deploy anything,
+  or push to GitHub.

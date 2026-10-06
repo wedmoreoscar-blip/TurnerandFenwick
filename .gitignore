@@ -11,3 +11,11 @@ docs/visual/screenshots/*/work/
 *:Zone.Identifier
 __pycache__/
 # kit:end core
+
+# kit:begin mcp-playwright
+# Page snapshots and console logs written by the Playwright MCP server.
+.playwright-mcp/
+# kit:end mcp-playwright
+
+# Node dependencies.
+node_modules/

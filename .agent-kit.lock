@@ -1,6 +1,6 @@
 {
   "_comment": "Written by `kit` from the agent kit. Records what the kit installed so kit and local edits can be told apart. Do not edit by hand.",
-  "kit_commit": "fd94755",
+  "kit_commit": "601294f",
   "packs": [
     "core",
     "traycer",
@@ -611,6 +611,14 @@
       "path": ".gitignore",
       "hash": "30fb76faa2d8bb23",
       "name": "core",
+      "style": "hash"
+    },
+    ".gitignore#mcp-playwright": {
+      "kind": "region",
+      "pack": "mcp-playwright",
+      "path": ".gitignore",
+      "hash": "5a3f6e2600138d67",
+      "name": "mcp-playwright",
       "style": "hash"
     },
     ".mcp.json#mcpServers/playwright=playwright": {

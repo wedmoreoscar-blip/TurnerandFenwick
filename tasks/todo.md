@@ -5,7 +5,7 @@ Build phases and their acceptance criteria, ported from the starter brief (`docs
 criteria pass** (`docs/decisions.md`, "Build in phase order"). Decisions behind each item are in
 `docs/decisions.md`; anything listed there as PENDING is not to be built.
 
-Status: Phase 0 complete (2026-10-07); Phase 1 not started.
+Status: Phases 0 and 1 complete on `dev` (2026-10-07); Phase 2 not started.
 
 ## Phase 0 — Scaffold
 
@@ -69,7 +69,7 @@ Plan (agreed with Oscar 2026-10-07). Each workstream ends in one acceptance chec
    creates the GB region (GBP, Stripe enabled), a GB tax region with 20% VAT, and one flat
    "Standard UK delivery" placeholder. Oscar: test keys into the env files, runs the script with
    `medusa exec`, `stripe listen`, test-card checkout.
-4. [ ] **Email.** A custom SMTP notification provider (`nodemailer`) on the email channel, and a
+4. [x] **Email.** A custom SMTP notification provider (`nodemailer`) on the email channel, and a
    test-email script. Dev sends from Oscar's own Gmail with an app password; Ben's address replaces
    it at launch (`.env` only).
 
@@ -84,7 +84,8 @@ Acceptance:
   is in `products`, public URL 200, rendered by `/dk/products/sweatshirt`).
 - [x] A test-mode Stripe payment succeeds end to end (2026-10-07: test-card checkout at `/gb`,
   order #1 £65.00 incl. £10.83 VAT, authorised, then captured by Oscar in the admin).
-- [ ] A test email sends via Gmail SMTP.
+- [x] A test email sends via Gmail SMTP (2026-10-07: `send-test-email.ts`, notification `smtp`
+  status `success`, received in Oscar's Gmail).
 - [x] The `public` schema is not reachable with the Supabase anon key (2026-10-07: `/rest/v1/product`
   404 PGRST205, with `Accept-Profile: public` 406 PGRST106, `/graphql/v1` 406).
 

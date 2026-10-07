@@ -60,5 +60,34 @@ module.exports = defineConfig({
         ],
       },
     },
+    {
+      // Configuring this module replaces Medusa's default, so the local `feed` provider (admin
+      // in-app notifications) is registered again here alongside our SMTP email provider.
+      resolve: '@medusajs/medusa/notification',
+      options: {
+        providers: [
+          {
+            resolve: '@medusajs/medusa/notification-local',
+            id: 'local',
+            options: {
+              name: 'Local Notification Provider',
+              channels: ['feed'],
+            },
+          },
+          {
+            resolve: './src/modules/smtp-notification',
+            id: 'smtp',
+            options: {
+              channels: ['email'],
+              host: process.env.SMTP_HOST,
+              port: process.env.SMTP_PORT,
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+              from: process.env.SMTP_FROM,
+            },
+          },
+        ],
+      },
+    },
   ],
 })

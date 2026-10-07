@@ -43,9 +43,13 @@ write code that assumes an answer.** If a task depends on one, stop and ask Osca
   migrations, including against `dev`".
 - ~~How hand-written SQL reaches Supabase~~ — closed 2026-10-06, see "Database and deployment
   workflow".
+- **Who owns each production account** (new, 2026-10-07): Stripe live, Gmail, Supabase `prod`,
+  hosting and the domain registrar. Ben's own accounts, with Oscar invited, fit "Built for handover
+  to Ben"; decide with Ben before Phase 5.
 - **Waiting on Ben** (§14), blocking specific phases, not architecture: store name and logo
   (placeholder `<STORE_NAME>`); the official Gmail address; shipping zones and rates and whether to
-  sell internationally; VAT registration status; returns policy; the final measurement fields and
+  sell internationally; VAT registration status (and whether he uses the VAT Margin Scheme; 20% is in
+  place meanwhile, see "Phase 1 settings"); returns policy; the final measurement fields and
   condition grades; the blog section's name ("Journal" is a placeholder); whether sold items appear
   anywhere other than their own URL; About page text and the first journal posts.
 
@@ -430,6 +434,9 @@ From §11.
 - A sales channel and publishable API key for the storefront.
 - Shipping options per Ben's rates.
 
+*Amended 2026-10-07:* done on `dev` except Redis, which moves to Phase 5 with hosting. Details in
+"Phase 1 settings".
+
 ## LOCKED — Medusa APIs are checked against current docs, never recalled (2026-10-03)
 
 From §0. Medusa v2 changes often. Check current documentation for Medusa APIs and config syntax
@@ -585,3 +592,39 @@ Oscar installed `supabase` and `supabase-postgres-best-practices` from `supabase
 frontmatter, the hashes in `skills-lock.json` no longer match; an `npx skills` update overwrites the
 `.agents` copy only and must be re-trimmed and re-mirrored. Where these skills conflict with "Database
 and deployment workflow", the ledger wins.
+
+## LOCKED — Built for handover to Ben (2026-10-07)
+
+Oscar builds the shop for Ben Turner, who runs it on his own accounts (his live Stripe account, his
+Gmail address, the production Supabase project, his domain). Every change must keep that switch a
+matter of configuration and written steps, not code changes:
+
+- **Account-specific values live only in env files.** Keys, addresses, URLs, bucket names, the
+  sender address: never in code. Every variable is listed in the app's `.env.template` with where
+  its value comes from.
+- **Store data is set up by idempotent scripts** in `apps/backend/src/scripts/` (for example
+  `setup-uk-region.ts`), safe to re-run and written to work on a fresh project, not only on `dev`'s
+  demo data. Avoid one-off admin clicking for anything a fresh project would need again.
+- **Every manual step is written down as it's introduced** in `docs/handover.md`: dashboard settings,
+  keys to create, webhooks to register, commands to run and in what order.
+- **No placeholder identity in code.** The store name, sender name and logo come from config or
+  wait on Ben (`<STORE_NAME>`); test content stays brand-neutral.
+
+## LOCKED — Phase 1 settings (2026-10-07)
+
+Settled with Oscar while building Phase 1 on `dev`:
+
+- **VAT:** the GB tax region's default rate is the standard 20%, and GBP prices are tax-inclusive
+  (UK consumer prices must include VAT). Still to confirm with Ben: whether he is VAT-registered (if
+  not, the rate goes) and whether he uses the VAT Margin Scheme, which Medusa can't calculate on its
+  own.
+- **Stripe capture is manual:** checkout authorises; Ben captures each payment from the order in the
+  admin (Medusa's default, `capture` unset). An uncaptured authorisation lapses after about 7 days.
+- **Region setup:** `apps/backend/src/scripts/setup-uk-region.ts` creates the United Kingdom region
+  (GBP default, Stripe), the GB tax rate, a UK shipping zone and a £5 "Standard UK delivery"
+  placeholder until Ben gives his rates.
+- **Product images:** public bucket `products`, 10 MB per file, JPEG, PNG, WebP and AVIF only.
+- **Redis modules** move to Phase 5, with hosting (still PENDING).
+- **Email:** the custom provider in `apps/backend/src/modules/smtp-notification/` sends the email
+  channel through `nodemailer`; Medusa's local provider keeps the `feed` channel. On `dev` it sends
+  from Oscar's Gmail with an app password; Ben's address replaces it at launch through `.env` alone.

@@ -1,88 +1,77 @@
-# Session handoff — Phase 0 scaffolded, `npm run dev` broken after the move
+# Session handoff — Phases 0 and 1 complete on `dev`; next is planning Phase 2
 
-Written 2026-10-06 18:29. `main` is at `b8cfbed`, 13 local commits ahead of `origin/main` (`68eacf8`).
-Oscar pushes; agents never do. Working tree clean at handoff.
+Written 2026-10-07 21:32. `main` is at `10afba0` plus this handoff commit, 18 local commits ahead of
+`origin/main` before it. Oscar pushes; agents never do. Working tree clean at handoff.
 
 ## What was done this session
 
-1. **All six open questions answered and recorded** in `docs/decisions.md`:
-   - Layout: `apps/backend` and `apps/storefront` at the repository root.
-   - Medusa docs: four official Medusa skills, plus `llms.txt` and per-page `.md`. No docs MCP: it
-     needs a Medusa Cloud account, which Oscar doesn't want. Re-confirmed at the end of the session.
-   - Oscar runs every database and deploy command: `medusa db:generate` (it connects to the database
-     too), `db:migrate`, `exec`, `user`, `npx supabase db push`, function deploys.
-   - Schema SQL goes in `supabase/migrations/` (created with `npx supabase migration new`) and Oscar
-     applies it with `db push`. The SQL editor is only for small data changes. The Supabase GitHub
-     integration was connected, then disconnected.
-   - RLS is written in the migration that creates each table. `prod` isn't created until Phase 5.
-2. **Tooling.**
-   - Supabase CLI: a root dev dependency, linked to `dev`.
-   - Supabase MCP: read-only, scoped to `dev`.
-   - Playwright MCP: through the kit pack, now `--headless`.
-   - Stripe CLI: installed and logged in to test mode.
-   All verified.
-3. **Agent deny-list in place now**, not at Phase 5, in `.claude/settings.json`, `opencode.json` and
-   `.codex/rules/project.rules`. Tested in Claude Code and Codex.
-4. **Skills.**
-   - Medusa: `building-with-medusa`, `building-admin-dashboard-customizations`,
-     `building-storefronts` and `storefront-best-practices`, all at upstream `066132d`.
-   - Supabase: `supabase` and `supabase-postgres-best-practices`, with trimmed frontmatter.
-   All mirrored in both skill folders.
-   - Removed from home folders: the user-wide Medusa Claude Code plugin (which `create-medusa-app`
-     installs) and a personal `find-skills` (backup at `~/global-skills-backup-2026-10-06.tar.gz`).
-   - `kit doctor` reports clean.
-5. **First Supabase migration**, `20261006155726_revoke_rls_auto_enable_execute.sql`, pushed by Oscar
-   and verified: the security advisor shows no issues.
-6. **Scaffold.** Oscar ran `create-medusa-app` against `dev`, then the agent moved it into the
-   repository root.
-   - Before the move, all three app checks passed: health 200, admin 200, and 4 demo products on
-     `/dk/store`.
-   - About 150 Medusa tables are in `public`, all with RLS on through Supabase's `ensure_rls` trigger.
-     Medusa is unaffected, because it owns the tables.
-   - The starter's `AGENTS.md`, `README` and `LICENSE` are in `docs/medusa_starter/` (reference only).
-7. **`AGENTS.md`** (Purpose, Project invariants) and **`docs/project_profile.md`** are filled in.
-   - The `build` profile passes: typecheck, backend lint, unit tests (none yet) and backend build.
-   - Turborepo's agent guidance is turned off in `turbo.json`.
+1. **Phase 0 closed.** `npm run dev` failed after the move because `DATABASE_URL` still held
+   Supabase's `[PASSWORD]` placeholder. Oscar put the real password in; health, admin and the
+   storefront's demo products were re-verified (`72a89a5`).
+2. **Phase 1, all four acceptance checks pass** (recorded with evidence in `tasks/todo.md`):
+   - **Database and Data API** (`57c8f1b`): migrations `20261007182414_create_app_schema.sql` (`app`
+     closed to anon and authenticated, `service_role` only) and `20261007182418_create_products_bucket.sql`.
+     Oscar pushed both and set the exposed schemas to `app` only. SSL driver options outside
+     development in `medusa-config.ts`.
+   - **Product images:** the S3 file provider on Supabase Storage (`forcePathStyle`); `next.config.js`
+     allows `*.supabase.co/storage/v1/object/public/**`. An admin upload landed in `products`.
+   - **Stripe and the UK** (`e594baa`, `ec3dea7`): Stripe provider with manual capture;
+     `apps/backend/src/scripts/setup-uk-region.ts` (Oscar ran it) made GBP the tax-inclusive default,
+     moved GB out of the demo Europe region and zone, and created the United Kingdom region (Stripe),
+     20% GB VAT and a £5 "Standard UK delivery" placeholder. Test-card checkout at `/gb`: order #1,
+     £65.00, authorised, then captured by Oscar.
+   - **Email** (`10afba0`): custom SMTP provider `apps/backend/src/modules/smtp-notification/`
+     (`nodemailer` 10, MIT-0, plus `@types/nodemailer`), the local `feed` provider re-registered,
+     and `src/scripts/send-test-email.ts`. Sent from Oscar's Gmail and received.
+3. **Decisions** (`docs/decisions.md`): new LOCKED "Built for handover to Ben" (account values only in
+   env files, idempotent setup scripts, every manual step in `docs/handover.md`, no placeholder
+   identity in code) and "Phase 1 settings" (20% VAT, manual capture, bucket limits, Redis to
+   Phase 5, dev email). PENDING gains "Who owns each production account"; the VAT item now also asks
+   about the Margin Scheme.
+4. **`docs/handover.md`**: new fresh-setup runbook covering every manual step so far.
+5. `docs/project_profile.md` Quirks: the `[YOUR-PASSWORD]` placeholder, and the storefront's one-hour
+   region cache.
 
 ## Known problems and risks
 
-- **`npm run dev` is broken since the move** (the next task). Both processes start from the root.
-  The storefront listens on :8000 but returns 500. The backend (`medusa develop`) never listens on
-  :9000, and `/health` gave no answer for over a minute. The cause isn't diagnosed yet; the backend's
-  terminal output hasn't been seen. Suspects:
-  - The dev database password was reset this session (the old one leaked into a `ps` listing), so
-    `DATABASE_URL` in `apps/backend/.env` may be wrong or not percent-encoded.
-  - Something path-related from moving `turnerandfenwick/apps` up a level, such as stale caches in
-    `apps/backend/.medusa/`.
-  - An agent ran `npm run build` in `apps/backend` while the dev processes were up; that rewrote
-    `.medusa/server`. The failure was seen before that build, though.
-- Storefront `next lint` fails on Medusa's own starter code. `npm audit`: 72 moderate and 59 high
-  advisories in the starter's dependencies; don't use `audit fix --force`.
-- No local Postgres, so backend integration tests can't run (they must never point at Supabase).
-  Decide on Docker before Phase 3.
+- **Fresh-project gap:** no script yet creates a stock location, shipping fulfillment set or
+  publishable API key (on `dev` the `create-medusa-app` seed did). Needed before Phase 5; marked
+  **Gap** in `docs/handover.md`.
+- **Demo data is still in `dev`:** the Europe region (EUR), demo products priced only in EUR/USD,
+  except the Medusa Sweatshirt, which has £30 GBP prices. Phase 2's tests need GBP-priced products:
+  decide how test data is created (a seed script Oscar runs, per the handover decision).
+- **Storefront region cache:** after any region change, stop the servers, delete
+  `apps/storefront/.next`, restart (Quirks).
+- Local Stripe webhooks need `stripe listen` running (command in `apps/backend/.env.template`); the CLI
+  login is to "New business · sandbox".
+- The backend now refuses to start without the `SMTP_*` and Stripe variables set.
+- To confirm with Ben: VAT registration and Margin Scheme; production account ownership.
+- Unchanged: storefront `next lint` fails on starter code; `npm audit` advisories in the starter's
+  dependencies; no local Postgres for backend integration tests (decide Docker before Phase 3).
 
 ## Read first next session
 
-`AGENTS.md`, `docs/project_profile.md` (Known failures, Quirks), `tasks/todo.md` (Phase 0
-acceptance), and `docs/decisions.md` ("Database and deployment workflow", "Data and identity rules").
+`AGENTS.md`; `docs/decisions.md` ("Built for handover to Ben", "Phase 1 settings", "Customer accounts
+and roles", "Outbound email", "UI overhaul tooling choices" for Playwright Test); `tasks/todo.md`
+(Phase 2); `docs/handover.md`; `docs/project_profile.md` (Quirks, Blocked verification).
 
 ## Explicit exclusions
 
-- Never read or print `apps/backend/.env` or `apps/storefront/.env.local`. Ask Oscar to check values.
-- Don't run database or seed commands. If the fix needs a migration or reseed, hand the command to
-  Oscar.
-- Don't start Phase 1 until Phase 0's acceptance passes.
+- Never read or print `apps/backend/.env` or `apps/storefront/.env.local`; ask Oscar to check values.
+- Don't run database, seed or `medusa exec` commands; hand them to Oscar.
+- Don't start building Phase 2 before Oscar agrees the plan.
 
 ## PROMPT
 
 ```text
-Run /kickoff. Then fix `npm run dev` after the scaffold was moved into the repository root (Phase 0's
-last open item). Ask Oscar to run `npm run dev` from ~/TurnerandFenwick and paste the backend's
-(@dtc/backend) error output, with any URL or password removed. Diagnose from that, starting with the
-suspects listed under "Known problems and risks" in HANDOFF.md: DATABASE_URL after the password reset
-(percent-encoding), stale apps/backend/.medusa caches, and path assumptions from the move. Never read
-the .env files; never run database commands. Once both apps run, re-verify Phase 0 acceptance: backend
-/health 200, admin /app loads, and demo products on the storefront (Playwright MCP). Then tick the
-items in tasks/todo.md, update docs/project_profile.md Known failures, and stop to report before
-starting Phase 1.
+Run /kickoff. Phases 0 and 1 are complete on dev. Plan Phase 2 (tasks/todo.md: guest and registered
+checkout, account pages, password reset, order emails, and the Playwright end-to-end suite) and agree
+it with Oscar before building. Check first, against current Medusa docs and the starter's code: whether
+the starter already has a password-reset flow (the decision says to build one if not, with the email
+sent by a subscriber to Medusa's password-reset event); which Medusa events to subscribe to for the
+order confirmation email and how its templates fit the "Built for handover to Ben" rules (no
+placeholder store name in code); how the Playwright suite gets GBP-priced test products (a seed
+script Oscar runs) and how it verifies emails were sent; and where Playwright Test is installed (in
+apps/storefront only, ask before adding it). Record the agreed plan in tasks/todo.md, and keep
+docs/handover.md current with any new manual step.
 ```

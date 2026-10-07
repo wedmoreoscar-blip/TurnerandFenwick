@@ -18,7 +18,7 @@ build         = "cd apps/backend && npm run build"
 # Not in any profile yet; see Known failures and Blocked verification.
 lint_storefront  = "cd apps/storefront && npx next lint"
 build_storefront = "cd apps/storefront && npm run build"
-dev              = "npm run dev"   # backend :9000 (admin /app), storefront :8000
+dev              = "npm run dev"   # backend :9000 (admin /app), storefront :8000; verified 2026-10-07
 
 [profiles]
 # tools/test-project <profile> runs these command names in order.
@@ -59,8 +59,6 @@ derive them by running the command. A parse or syntax error is never baseline no
 - `lint_storefront`: the Medusa starter's own code fails `next lint` (`no-unused-vars` and
   `no-explicit-any` in `src/lib/data/cart.ts`, among others). `next lint` is also deprecated in
   Next.js 15. Upstream code; fix or migrate to the ESLint CLI before adding it to a profile.
-- `npm run dev` (2026-10-06): after the move into the repository root, the backend process starts
-  but never listens on :9000, and the storefront returns 500. Not yet diagnosed.
 - `npm audit`: moderate and high advisories in the starter's dependency tree. Don't run
   `npm audit fix --force`; it pulls in breaking upgrades.
 
@@ -118,3 +116,7 @@ pattern.
 - `create-medusa-app` installs Medusa's Claude Code plugin user-wide. It was removed on 2026-10-06;
   the project skills replace it.
 - Playwright MCP writes snapshots into `.playwright-mcp/` (ignored).
+- A Supabase connection string copied from the dashboard contains a `[YOUR-PASSWORD]`-style
+  placeholder. If `DATABASE_URL` still holds it, `medusa develop` starts but never listens on :9000
+  and the storefront returns 500. The real password goes in `apps/backend/.env` (percent-encoded if
+  it has special characters).

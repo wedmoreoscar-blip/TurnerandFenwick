@@ -5,7 +5,7 @@ Build phases and their acceptance criteria, ported from the starter brief (`docs
 criteria pass** (`docs/decisions.md`, "Build in phase order"). Decisions behind each item are in
 `docs/decisions.md`; anything listed there as PENDING is not to be built.
 
-Status: planning done, Phase 0 not started.
+Status: Phase 0 complete (2026-10-07); Phase 1 not started.
 
 ## Phase 0 — Scaffold
 
@@ -20,7 +20,7 @@ Steps, in order:
 3. [x] Oscar runs Medusa migrations, `dev` included (2026-10-06).
 4. [x] Medusa agent skills installed in both skill folders (2026-10-06; see `docs/decisions.md`).
 5. [x] Supabase `dev` project created, GitHub integration disconnected, Supabase CLI installed as a
-   root dev dependency and linked (2026-10-06). [ ] Oscar installs the Stripe CLI.
+   root dev dependency and linked (2026-10-06). [x] Oscar installs the Stripe CLI (2026-10-06).
 6. [x] (2026-10-06) Oscar runs `npx create-medusa-app@latest` with `--with-nextjs-starter --use-npm --db-url <dev
    session pooler>`. Move the generated contents into the repository root, keeping `apps/…`, and
    merge the existing root `package.json` (the `supabase` dev dependency) into the generated one.
@@ -35,11 +35,12 @@ profile are filled in, and `tools/check-agent-setup` passes.
 
 Acceptance:
 
-- [ ] Both apps run locally. Passed in the scaffold folder on 2026-10-06; fails since the move into
-  the repository root (backend never listens on :9000). Fix next session.
-- [ ] The admin dashboard loads. Passed before the move; re-check after the fix.
-- [ ] The starter storefront shows demo products. Passed before the move (4 products on `/dk/store`);
-  re-check after the fix.
+- [x] Both apps run locally (2026-10-07: `npm run dev` from the root, backend `/health` 200,
+  storefront :8000 200). The post-move failure was the `[PASSWORD]` placeholder left in
+  `DATABASE_URL`; Oscar put the real password in.
+- [x] The admin dashboard loads (2026-10-07: `/app` 200).
+- [x] The starter storefront shows demo products (2026-10-07: 4 products on `/dk/store` via
+  Playwright MCP, no console errors).
 - [x] `docs/project_profile.md` commands are real and `tools/test-project quick` runs them
   (`build` profile: typecheck, lint, test, build all PASS, 2026-10-06).
 

@@ -19,6 +19,8 @@ build         = "cd apps/backend && npm run build"
 lint_storefront  = "cd apps/storefront && npx next lint"
 build_storefront = "cd apps/storefront && npm run build"
 dev              = "npm run dev"   # backend :9000 (admin /app), storefront :8000; verified 2026-10-07
+# Needs the dev servers, stripe listen and apps/storefront/.env.e2e (docs/handover.md, step 10).
+e2e              = "cd apps/storefront && npm run test:e2e"
 
 [profiles]
 # tools/test-project <profile> runs these command names in order.
@@ -30,7 +32,7 @@ full  = ["typecheck", "lint", "test", "build"]
 run     = ["typecheck", "lint", "test"]
 skip    = ["build"]
 forbid  = ["npx medusa db:generate", "npx medusa db:migrate", "npx medusa exec", "npx medusa user", "npx supabase db push", "npx supabase db reset", "npx supabase db query", "npx supabase db pull", "npx supabase migration repair", "npx supabase functions deploy", "npm run backend:seed"]
-blocked = ["live backend and browser checks (need Oscar's dev servers)", "storefront build (pre-renders pages from a running backend)", "backend integration tests (need a disposable Postgres; never Supabase)"]
+blocked = ["live backend and browser checks (need Oscar's dev servers)", "e2e suite (needs Oscar's dev servers, stripe listen and .env.e2e)", "storefront build (pre-renders pages from a running backend)", "backend integration tests (need a disposable Postgres; never Supabase)"]
 
 [worktree]
 copy_files       = ["apps/backend/.env", "apps/storefront/.env.local"]
@@ -45,7 +47,8 @@ dependency_files = ["package-lock.json"]
   (`test:unit`, `test:integration:modules`, `test:integration:http`). Lint is `medusa lint`
   (`@medusajs/eslint-plugin`).
 - `apps/storefront` (`@dtc/storefront`): Next.js 15 starter with Turbopack, Tailwind, `@medusajs/ui`.
-  There's no test suite yet (Playwright arrives in Phase 2).
+  Playwright Test 1.63.0 (pinned; 1.64.0 was a day old when added) runs the end-to-end suite in
+  `e2e/` with `npm run test:e2e`.
 - Root dev dependency: Supabase CLI (`npx supabase`), linked to the `dev` project. Stripe CLI is
   installed system-wide and logged in to test mode.
 - Supabase `dev`: Medusa's tables in `public`, all with RLS on through Supabase's `ensure_rls` event
@@ -68,6 +71,9 @@ derive them by running the command. A parse or syntax error is never baseline no
 
 - **Backend integration tests:** Medusa's test runner creates and drops its own database. It must
   never point at Supabase. There's no local Postgres yet.
+- **End-to-end suite:** needs the dev servers running, `stripe listen`, the seeded test products and
+  `apps/storefront/.env.e2e` (`docs/handover.md`, step 10). Each run registers customers and places
+  orders on `dev` through the Store API and emails plus-addresses of `E2E_EMAIL`.
 - **Storefront build:** `generateStaticParams` fetches products, collections and categories from
   the backend at build time, so it needs a running backend and `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`.
 - **Anything that writes to a database:** seeding, migrations and admin users are Oscar's.
@@ -123,3 +129,9 @@ pattern.
   placeholder. If `DATABASE_URL` still holds it, `medusa develop` starts but never listens on :9000
   and the storefront returns 500. The real password goes in `apps/backend/.env` (percent-encoded if
   it has special characters).
+- Emails come from subscribers in `apps/backend/src/subscribers/`, with templates in
+  `apps/backend/src/emails/`. They throw if `STOREFRONT_URL` (or, for admin resets,
+  `MEDUSA_BACKEND_URL`) is unset, before any notification is recorded, so the error shows only in
+  the backend log. An SMTP failure is recorded as a notification with status `failure`.
+- `apps/storefront/playwright.config.ts` loads `.env.e2e` with Node's `process.loadEnvFile`; the
+  starter's pinned `@types/node` 17 doesn't declare it, hence the cast there.

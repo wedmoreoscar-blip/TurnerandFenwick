@@ -1,77 +1,83 @@
-# Session handoff — Phases 0 and 1 complete on `dev`; next is planning Phase 2
+# Session handoff — Phase 2 built and partly proven on `dev`; next is getting the e2e suite green
 
-Written 2026-10-07 21:32. `main` is at `10afba0` plus this handoff commit, 18 local commits ahead of
+Written 2026-10-07 23:05. `main` is at `b610cea` plus this session's commit, 19 local commits ahead of
 `origin/main` before it. Oscar pushes; agents never do. Working tree clean at handoff.
 
 ## What was done this session
 
-1. **Phase 0 closed.** `npm run dev` failed after the move because `DATABASE_URL` still held
-   Supabase's `[PASSWORD]` placeholder. Oscar put the real password in; health, admin and the
-   storefront's demo products were re-verified (`72a89a5`).
-2. **Phase 1, all four acceptance checks pass** (recorded with evidence in `tasks/todo.md`):
-   - **Database and Data API** (`57c8f1b`): migrations `20261007182414_create_app_schema.sql` (`app`
-     closed to anon and authenticated, `service_role` only) and `20261007182418_create_products_bucket.sql`.
-     Oscar pushed both and set the exposed schemas to `app` only. SSL driver options outside
-     development in `medusa-config.ts`.
-   - **Product images:** the S3 file provider on Supabase Storage (`forcePathStyle`); `next.config.js`
-     allows `*.supabase.co/storage/v1/object/public/**`. An admin upload landed in `products`.
-   - **Stripe and the UK** (`e594baa`, `ec3dea7`): Stripe provider with manual capture;
-     `apps/backend/src/scripts/setup-uk-region.ts` (Oscar ran it) made GBP the tax-inclusive default,
-     moved GB out of the demo Europe region and zone, and created the United Kingdom region (Stripe),
-     20% GB VAT and a £5 "Standard UK delivery" placeholder. Test-card checkout at `/gb`: order #1,
-     £65.00, authorised, then captured by Oscar.
-   - **Email** (`10afba0`): custom SMTP provider `apps/backend/src/modules/smtp-notification/`
-     (`nodemailer` 10, MIT-0, plus `@types/nodemailer`), the local `feed` provider re-registered,
-     and `src/scripts/send-test-email.ts`. Sent from Oscar's Gmail and received.
-3. **Decisions** (`docs/decisions.md`): new LOCKED "Built for handover to Ben" (account values only in
-   env files, idempotent setup scripts, every manual step in `docs/handover.md`, no placeholder
-   identity in code) and "Phase 1 settings" (20% VAT, manual capture, bucket limits, Redis to
-   Phase 5, dev email). PENDING gains "Who owns each production account"; the VAT item now also asks
-   about the Margin Scheme.
-4. **`docs/handover.md`**: new fresh-setup runbook covering every manual step so far.
-5. `docs/project_profile.md` Quirks: the `[YOUR-PASSWORD]` placeholder, and the storefront's one-hour
-   region cache.
+1. **Phase 2 planned and agreed** (`tasks/todo.md`, Phase 2). Checked against Medusa 2.21.2 and the
+   starter: no password-reset pages existed, the profile password form was a stub, and the starter
+   already handles email verification (`/verify-account`). New LOCKED "Phase 2 settings" in
+   `docs/decisions.md`: customer email verification **on**; the suite checks emails through the Admin
+   API's notification records (reset and verification links also stored in `data`); Playwright Test in
+   `apps/storefront` only; the profile password form becomes a "send reset link" button.
+2. **Backend emails** (`apps/backend/src/emails/`, `src/subscribers/`): plain HTML templates with 11
+   Jest unit tests; subscribers for `order.placed` (confirmation, idempotent per order),
+   `shipment.created` (shipped, respects `no_notification`), `auth.password_reset` (customers to the
+   storefront, admin users to `/app/reset-password`) and `auth.verification_requested`. The store
+   name comes from the store record (admin → Settings → Store; on `dev` it's still "Default Store").
+   `medusa-config.ts`: `authVerificationsPerActor` for customers and `admin.storefrontUrl` from
+   `STOREFRONT_URL`; `MEDUSA_BACKEND_URL` is read by Medusa itself. Both are in `.env.template`.
+3. **Storefront:** one `/[countryCode]/reset-password` page (request form without a token, new
+   password with one); a "Forgot your password?" link on sign-in; the profile's password section
+   sends a reset link. Data functions added to `src/lib/data/customer.ts`.
+4. **Test data:** `apps/backend/src/scripts/seed-e2e-products.ts` (two GBP products, 1,000 stock,
+   restocks, replays search ingestion). Oscar ran it.
+5. **Playwright suite** (`apps/storefront/e2e/`, `@playwright/test` pinned to 1.63.0, `npm run
+   test:e2e`, settings in the gitignored `.env.e2e` from `.env.e2e.template`): guest checkout plus
+   confirmation email; register, verify, sign in, checkout, order history; password reset from
+   sign-in (including single use); reset link from the profile.
+6. **Docs:** `docs/handover.md` (email URLs, store name, step 10 for the e2e suite),
+   `docs/project_profile.md` (an `e2e` command, blocked-verification and quirk notes),
+   `tasks/lessons.md` (unquoted `#` in env values; non-unique starter test ids).
+
+Verification: `tools/test-project build` PASS (typecheck, lint, 11 unit tests, build). Storefront
+`tsc` and `next lint` on the changed files pass. **Live, first run:** the guest test drove the whole
+checkout with the Stripe test card to order #2 (payment `authorized`, `order-confirmation`
+notification `success`); registration sent three `email-verification` emails, all `success`. Four
+selector and timing fixes followed (recorded in `tasks/todo.md`).
 
 ## Known problems and risks
 
-- **Fresh-project gap:** no script yet creates a stock location, shipping fulfillment set or
-  publishable API key (on `dev` the `create-medusa-app` seed did). Needed before Phase 5; marked
-  **Gap** in `docs/handover.md`.
-- **Demo data is still in `dev`:** the Europe region (EUR), demo products priced only in EUR/USD,
-  except the Medusa Sweatshirt, which has £30 GBP prices. Phase 2's tests need GBP-priced products:
-  decide how test data is created (a seed script Oscar runs, per the handover decision).
-- **Storefront region cache:** after any region change, stop the servers, delete
-  `apps/storefront/.next`, restart (Quirks).
-- Local Stripe webhooks need `stripe listen` running (command in `apps/backend/.env.template`); the CLI
-  login is to "New business · sandbox".
-- The backend now refuses to start without the `SMTP_*` and Stripe variables set.
-- To confirm with Ben: VAT registration and Margin Scheme; production account ownership.
-- Unchanged: storefront `next lint` fails on starter code; `npm audit` advisories in the starter's
-  dependencies; no local Postgres for backend integration tests (decide Docker before Phase 3).
+- **Suite not green yet.** Every test fails at the suite's admin login (`e2e/support/emails.ts`): the
+  password in `apps/storefront/.env.e2e` contains `#` and is unquoted, so it is read cut short. At
+  handoff it still parsed as 14 characters with no `#`. Oscar quotes it
+  (`E2E_ADMIN_PASSWORD="..."`).
+- **Not yet seen running:** the reset pages, the profile reset button, sign-in after verification,
+  order history, and the shipped email (needs a shipment created in the admin).
+- Each suite run creates customers and orders on `dev` and emails plus-addresses of `E2E_EMAIL`
+  (about 8 emails per run). Uncaptured test authorisations lapse after about 7 days in Stripe.
+- The dev server compiles pages on first visit (up to ~35 s); the suite allows 60 s per step.
+- Unchanged: the fresh-project gap (no script creates a stock location, fulfillment set or publishable
+  key); the storefront's one-hour region cache; `next lint` deprecated and failing on starter code;
+  no local Postgres for backend integration tests (decide Docker before Phase 3).
+- To confirm with Ben: VAT registration and Margin Scheme; production account ownership; Stripe
+  receipts (PENDING, may duplicate the confirmation email).
 
 ## Read first next session
 
-`AGENTS.md`; `docs/decisions.md` ("Built for handover to Ben", "Phase 1 settings", "Customer accounts
-and roles", "Outbound email", "UI overhaul tooling choices" for Playwright Test); `tasks/todo.md`
-(Phase 2); `docs/handover.md`; `docs/project_profile.md` (Quirks, Blocked verification).
+`AGENTS.md`; `docs/decisions.md` ("Phase 2 settings", "Built for handover to Ben", "Customer
+accounts and roles"); `tasks/todo.md` (Phase 2, including the live-run notes); `docs/handover.md`
+(steps 5 and 10); `tasks/lessons.md`.
 
 ## Explicit exclusions
 
-- Never read or print `apps/backend/.env` or `apps/storefront/.env.local`; ask Oscar to check values.
-- Don't run database, seed or `medusa exec` commands; hand them to Oscar.
-- Don't start building Phase 2 before Oscar agrees the plan.
+- Never read or print `apps/backend/.env`, `apps/storefront/.env.local` or `apps/storefront/.env.e2e`.
+  To diagnose a value, print only derived facts (length, a boolean), never the value.
+- Don't run database, seed or `medusa exec` commands; hand them to Oscar. The suite itself writes only
+  through the Store API on `dev`, and runs only when Oscar's dev servers and `stripe listen` are up.
+- Don't start Phase 3 until all four Phase 2 acceptance checks pass.
 
 ## PROMPT
 
 ```text
-Run /kickoff. Phases 0 and 1 are complete on dev. Plan Phase 2 (tasks/todo.md: guest and registered
-checkout, account pages, password reset, order emails, and the Playwright end-to-end suite) and agree
-it with Oscar before building. Check first, against current Medusa docs and the starter's code: whether
-the starter already has a password-reset flow (the decision says to build one if not, with the email
-sent by a subscriber to Medusa's password-reset event); which Medusa events to subscribe to for the
-order confirmation email and how its templates fit the "Built for handover to Ben" rules (no
-placeholder store name in code); how the Playwright suite gets GBP-priced test products (a seed
-script Oscar runs) and how it verifies emails were sent; and where Playwright Test is installed (in
-apps/storefront only, ask before adding it). Record the agreed plan in tasks/todo.md, and keep
-docs/handover.md current with any new manual step.
+Run /kickoff. Phase 2 is built on dev and partly proven: a guest test-card checkout (order #2) sent
+its confirmation email, and registration sends verification emails. Get the Playwright suite green.
+First confirm with Oscar that he has quoted the password in apps/storefront/.env.e2e
+(E2E_ADMIN_PASSWORD="..."), and that npm run dev (backend :9000 and storefront :8000) and stripe
+listen are running. Then run `cd apps/storefront && npx playwright test`, fix failures in the suite
+or the Phase 2 code (never edit tests to hide a real bug), and rerun until all 4 tests pass. Then ask
+Oscar to create a shipment for one test order in the admin and check the order-shipped notification,
+and to look at one confirmation email in his real inbox. Tick the Phase 2 acceptance boxes in
+tasks/todo.md with evidence, and keep docs/handover.md current.
 ```

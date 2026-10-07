@@ -5,7 +5,8 @@ Build phases and their acceptance criteria, ported from the starter brief (`docs
 criteria pass** (`docs/decisions.md`, "Build in phase order"). Decisions behind each item are in
 `docs/decisions.md`; anything listed there as PENDING is not to be built.
 
-Status: Phases 0 and 1 complete on `dev` (2026-10-07); Phase 2 not started.
+Status: Phases 0 and 1 complete on `dev` (2026-10-07). Phase 2 code written and partly proven live;
+the suite is not green yet (see Phase 2).
 
 ## Phase 0 — Scaffold
 
@@ -94,10 +95,59 @@ Acceptance:
 Scope: guest checkout, registered checkout, account pages, the password-reset flow, order emails.
 Write the Playwright end-to-end suite.
 
+Plan (agreed with Oscar 2026-10-07; settings in `docs/decisions.md`, "Phase 2 settings"). Checked
+against Medusa 2.21.2 and the starter: the starter has no password-reset pages, its profile password
+form is a stub, and it already handles email verification (`/verify-account`).
+
+1. [x] **Backend emails.** Plain, brand-neutral HTML templates as functions in
+   `apps/backend/src/emails/`, unit-tested with Jest. The store name comes from Medusa's store record
+   (`store.name`, editable in the admin), the sender from `SMTP_FROM`. Subscribers:
+   - `order.placed` → order confirmation (items, totals incl. VAT, delivery address, order number).
+   - `shipment.created` → order shipped (skipped when `no_notification`).
+   - `auth.password_reset` → reset link: customers to the storefront, admin users to `/app`.
+   - `auth.verification_requested` → verification link to `/verify-account`.
+   Reset and verification links also go in the notification's `data` for the suite.
+   `medusa-config.ts`: `admin.storefrontUrl` and `admin.backendUrl` from `STOREFRONT_URL` and
+   `MEDUSA_BACKEND_URL` (added to `.env.template`); `http.authVerificationsPerActor` for customers.
+2. [x] **Storefront account.** One `/reset-password` page (request form without a token, new
+   password with one; top-level like the starter's `/verify-account`), new functions in
+   `src/lib/data/customer.ts` (`sdk.auth.resetPassword`, `sdk.auth.updateProvider`), a "Forgot
+   password?" link on the login form, and the profile password stub replaced by a "send me a reset
+   link" button.
+3. [x] **Test products.** `apps/backend/src/scripts/seed-e2e-products.ts`, idempotent and
+   brand-neutral: `e2e-` products in GBP in the default sales channel with ample stock. `dev` only;
+   Oscar runs it.
+4. [x] **Playwright suite** in `apps/storefront/e2e/` (`@playwright/test`, storefront only). Config
+   from `apps/storefront/.env.e2e` (gitignored, with a template): storefront and backend URLs, a test
+   admin login (Oscar creates the user), and a plus-addressed base email on Oscar's Gmail so no mail
+   goes to invented addresses. Emails are checked through `GET /admin/notifications`. Runs against
+   Oscar's dev servers with `stripe listen`.
+5. [x] **Docs.** `docs/handover.md` (URL variables, verification, test admin, seed),
+   `docs/project_profile.md` (an `e2e` command; the suite needs live servers).
+
+Oscar's steps: set `STOREFRONT_URL` and `MEDUSA_BACKEND_URL` in `apps/backend/.env`; create the test
+admin with `npx medusa user`; run the seed script with `npx medusa exec`; start the dev servers and
+`stripe listen`; check one confirmation email in a real inbox.
+
+Done 2026-10-07 (code only): `tools/test-project build` passes (11 email template unit tests);
+storefront typecheck and `next lint` on the changed files pass; `playwright test --list` finds 4
+tests. **Not yet run live:** the subscribers, the reset pages and the suite need the steps above.
+The Stripe iframe selectors in `e2e/support/checkout.ts` are the most likely to need adjusting.
+
+First live run, 2026-10-07 (Oscar did all setup steps): the guest test drove the whole checkout,
+Stripe card included, to order #2 (payment `authorized`, `order-confirmation` notification
+`success`). Registration sent three `email-verification` notifications, all `success`. Fixed in the
+suite: `product-title` also marks related-product cards, cart rows are `product-row`, add-to-cart
+needs a wait for "Cart (1)", and dev-mode page compiles need 60 s. **Blocking the rest:** every test
+fails at the admin login in `e2e/support/emails.ts`, because the password in `.env.e2e` contains `#`
+and is unquoted, so it is read truncated. Oscar quotes it, then rerun the whole suite. Not yet seen
+running: the reset pages, the profile reset button, sign-in after verification, order history, and
+the shipped email (needs a shipment created in the admin).
+
 Acceptance (Playwright suite green for):
 
 - [ ] browse → product → add to basket → guest checkout with a Stripe test card
-- [ ] register → log in → checkout → order appears in history
+- [ ] register → verify email → log in → checkout → order appears in history
 - [ ] password reset end to end
 - [ ] order confirmation email received
 

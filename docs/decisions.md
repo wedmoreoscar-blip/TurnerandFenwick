@@ -628,3 +628,21 @@ Settled with Oscar while building Phase 1 on `dev`:
 - **Email:** the custom provider in `apps/backend/src/modules/smtp-notification/` sends the email
   channel through `nodemailer`; Medusa's local provider keeps the `feed` channel. On `dev` it sends
   from Oscar's Gmail with an app password; Ben's address replaces it at launch through `.env` alone.
+
+## LOCKED — Phase 2 settings (2026-10-07)
+
+Settled with Oscar while planning Phase 2:
+
+- **Customers verify their email before they can log in.** Medusa's `http.authVerificationsPerActor`
+  for `customer` (emailpass, entity type `email`), and a subscriber to `auth.verification_requested`
+  that emails a link to the starter's `/verify-account?token=…` page. Guest checkout is unaffected:
+  guests never log in. Admin users are not verified this way.
+- **The end-to-end suite checks emails through the Admin API**, not a mail catcher: it reads
+  Medusa's notification records (`GET /admin/notifications`, status `success` means Gmail accepted
+  the message). To let the suite follow reset and verification links, those subscribers also store
+  the link in the notification's `data` (Medusa persists `data`, not the rendered content). The
+  tokens are single-use and short-lived. Receipt in a real inbox is checked by hand once.
+- **Playwright Test** (`@playwright/test`) is a dev dependency of `apps/storefront` only.
+- **The profile page's password form** (a non-working stub in the starter) is replaced by a button
+  that sends a password-reset link through the same reset flow. Medusa's emailpass provider has no
+  change-password-with-old-password route.

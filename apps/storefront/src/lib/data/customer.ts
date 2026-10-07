@@ -247,6 +247,66 @@ export async function confirmEmailVerification(
   }
 }
 
+export type PasswordResetState =
+  | { state: "error"; error: string }
+  | { state: "success" }
+  | null
+
+// Asks the backend to email a password-reset link. The backend answers the
+// same way whether or not an account exists, so this never reveals which
+// emails are registered.
+async function requestPasswordReset(email: string): Promise<PasswordResetState> {
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", { identifier: email })
+    return { state: "success" }
+  } catch (error) {
+    return { state: "error", error: String(error) }
+  }
+}
+
+// The "Forgot your password?" form.
+export async function requestPasswordResetFromForm(
+  _currentState: unknown,
+  formData: FormData
+): Promise<PasswordResetState> {
+  return requestPasswordReset(formData.get("email") as string)
+}
+
+// The profile page's "Send reset link" button, for the signed-in customer.
+export async function requestPasswordResetForCustomer(): Promise<PasswordResetState> {
+  const customer = await retrieveCustomer()
+
+  if (!customer) {
+    return { state: "error", error: "You're no longer signed in." }
+  }
+
+  return requestPasswordReset(customer.email)
+}
+
+// Sets a new password using the single-use token from the reset email.
+export async function resetPassword(
+  _currentState: unknown,
+  formData: FormData
+): Promise<PasswordResetState> {
+  const token = formData.get("token") as string
+  const password = formData.get("password") as string
+
+  if (password !== formData.get("confirm_password")) {
+    return { state: "error", error: "The passwords don't match." }
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token)
+    return { state: "success" }
+  } catch {
+    return {
+      state: "error",
+      error:
+        "This reset link is invalid or has expired. Request a new one below.",
+    }
+  }
+}
+
 export async function signout(countryCode: string) {
   await sdk.auth.logout()
 

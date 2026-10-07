@@ -16,7 +16,18 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET,
       cookieSecret: process.env.COOKIE_SECRET,
+      // Customers confirm their email before they can log in; guest checkout is unaffected
+      // (docs/decisions.md, "Phase 2 settings"). The link is sent by
+      // src/subscribers/verification-requested.ts.
+      authVerificationsPerActor: {
+        customer: [{ entity_type: 'email', auth_provider: 'emailpass' }],
+      },
     }
+  },
+  admin: {
+    // Emails link here (password reset, email verification, order pages). The admin's own URL,
+    // used in admin password-reset links, comes from MEDUSA_BACKEND_URL, which Medusa reads itself.
+    storefrontUrl: process.env.STOREFRONT_URL,
   },
   modules: [
     {

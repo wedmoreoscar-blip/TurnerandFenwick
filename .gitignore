@@ -52,3 +52,9 @@ Thumbs.db
 **/.env.development.local
 **/.env.test.local
 **/.env.production.local
+**/.env.e2e
+
+# Playwright Test output (apps/storefront)
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/

@@ -54,7 +54,14 @@ are listed in step 7.
 2. In `apps/backend/.env`: `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER` (the address),
    `SMTP_PASS` (the app password, no spaces), `SMTP_FROM` (`Name <same address>`; Gmail sends only
    as its own address).
-3. Check: `npx medusa exec ./src/scripts/send-test-email.ts <recipient>` ends with `status success`.
+3. Also in `apps/backend/.env`: `STOREFRONT_URL` (the storefront's public URL) and
+   `MEDUSA_BACKEND_URL` (this server's public URL). Emails link to them: customers' password-reset
+   and email-verification links go to the storefront, admin password-reset links to `/app`.
+4. Admin → Settings → Store → set the store's **name**. Every email shows it; nothing in code does.
+5. Check: `npx medusa exec ./src/scripts/send-test-email.ts <recipient>` ends with `status success`.
+
+Customers must confirm their email before they can sign in (`http.authVerificationsPerActor` in
+`medusa-config.ts`); guest checkout doesn't need it. There is nothing to set up beyond the URLs above.
 
 ## 6. United Kingdom region, VAT and delivery
 
@@ -79,3 +86,18 @@ storefront, delete `apps/storefront/.next` and restart.
 
 - Backend `/health` returns 200; the admin loads at `/app`.
 - A test-card checkout at `/gb` places an order; capturing it in the admin succeeds.
+- The order confirmation email arrives; "Forgot your password?" on the sign-in page sends a working
+  reset link; registering sends a verification link.
+
+## 10. End-to-end tests (`dev` only, never `prod`)
+
+The Playwright suite in `apps/storefront/e2e/` runs against the dev servers.
+
+1. A dedicated admin user for the suite (it only reads notifications):
+   `cd apps/backend && npx medusa user -e <e2e-admin-email> -p <password>`.
+2. Test products, after step 6: `npx medusa exec ./src/scripts/seed-e2e-products.ts`. Safe to
+   re-run; it also restocks them.
+3. `cp apps/storefront/.env.e2e.template apps/storefront/.env.e2e` and fill it in: the admin user
+   from 1, and `E2E_EMAIL`, a mailbox you own (tests send to plus-addresses of it).
+4. Once per machine: `cd apps/storefront && npx playwright install chromium`.
+5. Start `npm run dev` and `stripe listen`, then `cd apps/storefront && npm run test:e2e`.

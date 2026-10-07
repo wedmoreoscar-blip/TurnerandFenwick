@@ -116,6 +116,9 @@ pattern.
 - `create-medusa-app` installs Medusa's Claude Code plugin user-wide. It was removed on 2026-10-06;
   the project skills replace it.
 - Playwright MCP writes snapshots into `.playwright-mcp/` (ignored).
+- The storefront caches regions for an hour (`force-cache` in `src/lib/data/regions.ts`, plus the
+  middleware's in-memory region map). After changing regions or their countries, stop the dev
+  servers, delete `apps/storefront/.next` and restart, or the old prices and currency stay.
 - A Supabase connection string copied from the dashboard contains a `[YOUR-PASSWORD]`-style
   placeholder. If `DATABASE_URL` still holds it, `medusa develop` starts but never listens on :9000
   and the storefront returns 500. The real password goes in `apps/backend/.env` (percent-encoded if

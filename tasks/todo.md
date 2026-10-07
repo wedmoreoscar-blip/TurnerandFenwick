@@ -66,14 +66,16 @@ Plan (agreed with Oscar 2026-10-07). Each workstream ends in one acceptance chec
    `forcePathStyle`; the Supabase Storage host in `next.config.js` image patterns. Oscar: `db push`,
    S3 access keys into `.env`, a test upload in the admin. Done 2026-10-07.
 3. [ ] **Stripe and the GB region.** The Stripe provider; an idempotent `src/scripts` setup that
-   creates the GB region (GBP, Stripe enabled), a GB tax region with no rate yet, and one flat
+   creates the GB region (GBP, Stripe enabled), a GB tax region with 20% VAT, and one flat
    "Standard UK delivery" placeholder. Oscar: test keys into the env files, runs the script with
    `medusa exec`, `stripe listen`, test-card checkout.
 4. [ ] **Email.** A custom SMTP notification provider (`nodemailer`) on the email channel, and a
    test-email script. Dev sends from Oscar's own Gmail with an app password; Ben's address replaces
    it at launch (`.env` only).
 
-Placeholders until Ben answers: no VAT rate, one flat shipping rate. Redis modules are deferred to
+VAT: the GB tax region uses the standard 20% rate, tax-inclusive GBP prices (Oscar, 2026-10-07).
+Placeholder until Ben answers: one flat shipping rate. Stripe capture stays manual: Ben captures
+each payment in the admin (Oscar, 2026-10-07). Redis modules are deferred to
 Phase 5 with hosting.
 
 Acceptance:

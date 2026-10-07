@@ -42,5 +42,23 @@ module.exports = defineConfig({
         ],
       },
     },
+    {
+      // Stripe card payments. capture stays at its default (false): payments are authorised at
+      // checkout and Ben captures each one from the order in the admin (Oscar, 2026-10-07).
+      // Webhook: {backend}/hooks/payment/stripe_stripe.
+      resolve: '@medusajs/medusa/payment',
+      options: {
+        providers: [
+          {
+            resolve: '@medusajs/medusa/payment-stripe',
+            id: 'stripe',
+            options: {
+              apiKey: process.env.STRIPE_API_KEY,
+              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+            },
+          },
+        ],
+      },
+    },
   ],
 })

@@ -55,12 +55,35 @@ created in `public`, Medusa's included, gets RLS switched on with no policies. M
 table owner, so it should be unaffected; confirm this after the scaffold and when designing the
 lockdown.
 
+Plan (agreed with Oscar 2026-10-07). Each workstream ends in one acceptance check.
+
+1. [x] **Database and Data API.** SSL `databaseDriverOptions` outside development; a migration that
+   creates the `app` schema with grants to `service_role` only. Oscar: `db push`, then sets the
+   dashboard's exposed schemas to `app` only. Baseline 2026-10-07: `GET /rest/v1/product` with the
+   publishable key returns `200 []` (reachable, rows hidden by RLS). Done 2026-10-07: both
+   migrations pushed; Data API exposes only `app`.
+2. [x] **Product images.** A migration for a public `products` bucket; the S3 file provider with
+   `forcePathStyle`; the Supabase Storage host in `next.config.js` image patterns. Oscar: `db push`,
+   S3 access keys into `.env`, a test upload in the admin. Done 2026-10-07.
+3. [ ] **Stripe and the GB region.** The Stripe provider; an idempotent `src/scripts` setup that
+   creates the GB region (GBP, Stripe enabled), a GB tax region with no rate yet, and one flat
+   "Standard UK delivery" placeholder. Oscar: test keys into the env files, runs the script with
+   `medusa exec`, `stripe listen`, test-card checkout.
+4. [ ] **Email.** A custom SMTP notification provider (`nodemailer`) on the email channel, and a
+   test-email script. Dev sends from Oscar's own Gmail with an app password; Ben's address replaces
+   it at launch (`.env` only).
+
+Placeholders until Ben answers: no VAT rate, one flat shipping rate. Redis modules are deferred to
+Phase 5 with hosting.
+
 Acceptance:
 
-- [ ] A product image upload lands in Supabase Storage.
+- [x] A product image upload lands in Supabase Storage (2026-10-07: admin upload to the sweatshirt
+  is in `products`, public URL 200, rendered by `/dk/products/sweatshirt`).
 - [ ] A test-mode Stripe payment succeeds end to end.
 - [ ] A test email sends via Gmail SMTP.
-- [ ] The `public` schema is not reachable with the Supabase anon key.
+- [x] The `public` schema is not reachable with the Supabase anon key (2026-10-07: `/rest/v1/product`
+  404 PGRST205, with `Accept-Profile: public` 406 PGRST106, `/graphql/v1` 406).
 
 ## Phase 2 — Core flows and tests
 

@@ -39,6 +39,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.s3.amazonaws.com",
       },
+      {
+        // Product images in Supabase Storage (dev and prod projects).
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {

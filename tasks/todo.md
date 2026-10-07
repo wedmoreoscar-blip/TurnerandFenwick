@@ -65,7 +65,7 @@ Plan (agreed with Oscar 2026-10-07). Each workstream ends in one acceptance chec
 2. [x] **Product images.** A migration for a public `products` bucket; the S3 file provider with
    `forcePathStyle`; the Supabase Storage host in `next.config.js` image patterns. Oscar: `db push`,
    S3 access keys into `.env`, a test upload in the admin. Done 2026-10-07.
-3. [ ] **Stripe and the GB region.** The Stripe provider; an idempotent `src/scripts` setup that
+3. [x] **Stripe and the GB region.** The Stripe provider; an idempotent `src/scripts` setup that
    creates the GB region (GBP, Stripe enabled), a GB tax region with 20% VAT, and one flat
    "Standard UK delivery" placeholder. Oscar: test keys into the env files, runs the script with
    `medusa exec`, `stripe listen`, test-card checkout.
@@ -82,7 +82,8 @@ Acceptance:
 
 - [x] A product image upload lands in Supabase Storage (2026-10-07: admin upload to the sweatshirt
   is in `products`, public URL 200, rendered by `/dk/products/sweatshirt`).
-- [ ] A test-mode Stripe payment succeeds end to end.
+- [x] A test-mode Stripe payment succeeds end to end (2026-10-07: test-card checkout at `/gb`,
+  order #1 £65.00 incl. £10.83 VAT, authorised, then captured by Oscar in the admin).
 - [ ] A test email sends via Gmail SMTP.
 - [x] The `public` schema is not reachable with the Supabase anon key (2026-10-07: `/rest/v1/product`
   404 PGRST205, with `Accept-Profile: public` 406 PGRST106, `/graphql/v1` 406).

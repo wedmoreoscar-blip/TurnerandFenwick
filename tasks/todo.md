@@ -144,12 +144,32 @@ and is unquoted, so it is read truncated. Oscar quotes it, then rerun the whole 
 running: the reset pages, the profile reset button, sign-in after verification, order history, and
 the shipped email (needs a shipment created in the admin).
 
+Suite green, 2026-10-08: `npx playwright test` → **4 passed (3.4m)** against the dev servers with
+`stripe listen`, after Oscar quoted the admin password. Two fixes first: (1) a real bug on the
+profile page: the "Send link" button couldn't be clicked, because the Phone section's closed edit
+panel (`max-h-0 opacity-0 overflow-visible` in `AccountInfo`) overflowed onto it, so its hidden Save
+button caught the click. The closed panel is now also `invisible`, which also takes its hidden
+inputs out of the tab order. A scratch check confirmed the profile sections still open, save and
+close. (2) The test timeout went from 120 s to 300 s: on a cold dev server the first test spent 40 s
+waiting for `/store` to compile and timed out at the Stripe step. The guest test passed again on its
+own and in the full run.
+
 Acceptance (Playwright suite green for):
 
-- [ ] browse → product → add to basket → guest checkout with a Stripe test card
-- [ ] register → verify email → log in → checkout → order appears in history
-- [ ] password reset end to end
-- [ ] order confirmation email received
+- [x] browse → product → add to basket → guest checkout with a Stripe test card (`guest-checkout`)
+- [x] register → verify email → log in → checkout → order appears in history
+  (`registered-checkout`)
+- [x] password reset end to end (`password-reset`: from sign-in, including single use, and from the
+  profile)
+- [x] order confirmation email received (the suite sees `order-confirmation` with status `success`
+  for its order number; Oscar saw order #6's confirmation, for the E2E test trousers, in his real
+  inbox on 2026-10-08)
+
+**Phase 2 complete, 2026-10-08.**
+
+Shipped email seen, 2026-10-08: Oscar fulfilled, shipped and captured order #2 in the admin. Its
+`order-shipped` notification is `success` (13:31 UTC, order and fulfilment ids in `data`), the order
+shows payment `captured` and fulfilment `shipped`, and the email arrived in Oscar's real inbox.
 
 ## Phase 3 — Custom features
 

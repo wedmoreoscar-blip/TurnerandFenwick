@@ -106,6 +106,9 @@ const AccountInfo = ({
         </Disclosure.Panel>
       </Disclosure>
 
+      {/* The closed panel overflows onto the next section, so it's made
+          invisible too: otherwise its hidden inputs and Save button catch
+          clicks and focus meant for the section below. */}
       <Disclosure>
         <Disclosure.Panel
           static
@@ -113,7 +116,7 @@ const AccountInfo = ({
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-visible",
             {
               "max-h-[1000px] opacity-100": state,
-              "max-h-0 opacity-0": !state,
+              "max-h-0 opacity-0 invisible": !state,
             }
           )}
         >

@@ -17,3 +17,10 @@ cards on a product page, `cart-item` is the header dropdown while cart-page rows
 and `register-button` is both the "Join us" link and the register form's submit. Scope with a parent
 test id or use a role locator. (2026-10-07, the first e2e run.)
 
+## Collapsed panels that overflow still catch clicks
+
+`opacity-0` hides content but leaves it clickable and focusable, and `max-h-0` with
+`overflow-visible` lets it spill onto whatever comes next. The starter's `AccountInfo` edit panels
+did both, so the Phone section's invisible Save button covered the profile's "Send link" button. Add
+`invisible` (or `overflow-hidden`) to a collapsed state. A Playwright "subtree intercepts pointer
+events" error on a visible button points to this. (2026-10-08, the profile reset test.)

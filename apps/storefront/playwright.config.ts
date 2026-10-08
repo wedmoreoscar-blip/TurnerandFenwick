@@ -21,8 +21,9 @@ if (fs.existsSync(envFile)) {
  */
 export default defineConfig({
   testDir: "./e2e",
-  // Checkout steps wait on the backend and Stripe; give each test room.
-  timeout: 120_000,
+  // Checkout steps wait on the backend and Stripe, and the first test of a run
+  // also waits for the dev server to compile each page (40s for /store alone).
+  timeout: 300_000,
   expect: { timeout: 15_000 },
   // One worker: the tests write through one dev backend, and Gmail rate-limits
   // the emails they trigger.

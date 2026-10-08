@@ -101,3 +101,6 @@ The Playwright suite in `apps/storefront/e2e/` runs against the dev servers.
    from 1, and `E2E_EMAIL`, a mailbox you own (tests send to plus-addresses of it).
 4. Once per machine: `cd apps/storefront && npx playwright install chromium`.
 5. Start `npm run dev` and `stripe listen`, then `cd apps/storefront && npm run test:e2e`.
+   A run takes about 4 minutes, longer on the first run after starting the dev servers (each page
+   compiles on its first visit). Each run creates test customers and orders on `dev` and sends about
+   8 emails to plus-addresses of `E2E_EMAIL`.
